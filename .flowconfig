@@ -1,0 +1,14 @@
+[ignore]
+<PROJECT_ROOT>/.history/*
+<PROJECT_ROOT>/tmp
+<PROJECT_ROOT>/.git
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+
+[strict]
