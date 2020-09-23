@@ -6,6 +6,7 @@ import type { Element } from 'react'
 import type {
   BodyT,
   PairT,
+  ResponseT,
   UrlPairT,
 } from '../types'
 
@@ -16,6 +17,7 @@ import NativeSelect from '@material-ui/core/NativeSelect'
 import Paper from '@material-ui/core/Paper'
 import Tab from '@material-ui/core/Tab'
 import Tabs from '@material-ui/core/Tabs'
+import Toolbar from '@material-ui/core/Toolbar'
 import TextField from '@material-ui/core/TextField'
 
 import Body from './Body'
@@ -36,14 +38,22 @@ const REQUESTS: Array<string> = [
   'head',
 ]
 
-function Request(): Element<typeof Paper> {
-  const [selectedRequest: string, setSelectedRequest: Function] = React.useState(REQUESTS[1])
-  const [url: string, setUrl: Function] = React.useState('https://jsonplaceholder.typicode.com/posts')
-  const [queries: Array<PairT>, setQueries: Function] = React.useState([{ key: '', value: '', enabled: false }])
-  const [headers: Array<PairT>, setHeaders: Function] = React.useState([{ key: '', value: '', enabled: false }])
+type PropsT = {
+  dispatchResponse: Function,
+}
+
+function Request(props: PropsT): Element<typeof Paper> {
+  const {
+    dispatchResponse,
+  } = props
+
+  const [activeTab: string, setActiveTab: Function] = React.useState('query')
   const [body: BodyT, dispatchBody: Function] = React.useReducer(bodyReducer, { 'Ace': '', 'FormUrlEncoded': [] })
   const [bodyType: string, setBodyType: Function] = React.useState('json')
-  const [activeTab: string, setActiveTab: Function] = React.useState('query')
+  const [headers: Array<PairT>, setHeaders: Function] = React.useState([{ key: '', value: '', enabled: false }])
+  const [queries: Array<PairT>, setQueries: Function] = React.useState([{ key: '', value: '', enabled: false }])
+  const [selectedRequest: string, setSelectedRequest: Function] = React.useState(REQUESTS[1])
+  const [url: string, setUrl: Function] = React.useState('https://jsonplaceholder.typicode.com/posts')
 
   function bodyReducer(state: BodyT, action: { type: string, payload: any }): BodyT {
     switch (action.type) {
@@ -67,7 +77,7 @@ function Request(): Element<typeof Paper> {
     let data
 
     if (bodyType === 'x-www-form-urlencoded') {
-      const pairs = body.FormUrlEncoded.filter(pairFilter).reduce(pairReducer, {})
+      const pairs = typeof body.FormUrlEncoded !== 'undefined' && body.FormUrlEncoded.filter(pairFilter).reduce(pairReducer, {})
       data = qs.stringify(pairs)
     } else {
       data = body.Ace
@@ -77,16 +87,26 @@ function Request(): Element<typeof Paper> {
       method: selectedRequest,
       params: activeQueries,
       data: data,
-    }).then((res: any) => console.log(res))
-      .catch((err: any) => {
-        if (err.response) {
-          console.log('got response')
-        } else if (err.request) {
-          console.log('got request')
-        } else {
-          console.log('catchall')
-        }
-      })
+    }).then((res: any) => {
+      const response: ResponseT = transformResponse(res)
+      dispatchResponse({ type: 'setResponse', payload: response })
+    }).catch((err: any) => {
+      if (err.response) {
+        console.log('got response')
+      } else if (err.request) {
+        console.log('got request')
+      } else {
+        console.log('catchall')
+      }
+    })
+  }
+
+  function transformResponse(res: any): ResponseT {
+    const headerReducer = (array: Array<PairT>, key: string): Array<PairT> => ([...array, { key: key, value: res.headers[key], enabled: true }])
+    const body = JSON.stringify(res.data)
+    const headers = Object.keys(res.headers).reduce(headerReducer, [])
+    console.log(headers)
+    return { body: { Response: body }, code: res.status, headers: headers }
   }
 
   function addPair(pairs, setter): void {
@@ -111,7 +131,7 @@ function Request(): Element<typeof Paper> {
 
   return (
     <Paper className="Request">
-      <Box component="span">
+      <Toolbar>
         <NativeSelect
           value={selectedRequest}
           onChange={(e: SyntheticEvent<HTMLInputElement>): void => setSelectedRequest(e.currentTarget.value)}
@@ -120,13 +140,13 @@ function Request(): Element<typeof Paper> {
             <option key={request} value={request}>{upperCase(request)}</option>
           ))}
         </NativeSelect>
-      </Box>
-      <Box component="span">
-        <TextField label="Enter URL" onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) } defaultValue={url}/>
-      </Box>
-      <Box component="span">
-        <Button onClick={submitRequest}>Send</Button>
-      </Box>
+        <Box component="span">
+          <TextField label="Enter URL" onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) } defaultValue={url}/>
+        </Box>
+        <Box component="span">
+          <Button onClick={submitRequest}>Send</Button>
+        </Box>
+      </Toolbar>
       <Box>
         <AppBar position="static">
           <Tabs value={activeTab}>

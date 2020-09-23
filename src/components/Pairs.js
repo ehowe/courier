@@ -13,51 +13,53 @@ import Button from '@material-ui/core/Button'
 import Pair from './Pair'
 
 type PropsT = {
-  addPair: Function,
-  deletePair: Function,
+  addPair?: Function,
+  deletePair?: Function,
   pairs: Array<PairT>,
-  setPair: Function,
-  setter: Function,
+  readOnly?: boolean,
+  setPair?: Function,
+  setter?: Function,
 }
 
 function Pairs(props: PropsT): Element<'div'> {
-  console.log(props)
-
   const {
     addPair,
     deletePair,
-    pairs,
+    pairs: pairsParam,
+    readOnly = false,
     setPair,
     setter,
   } = props
 
   useEffect(() => {
-    setAllPairs(pairs)
-  }, [pairs])
+    setAllPairs(pairsParam)
+  }, [pairsParam])
 
-  const [allPairs, setAllPairs] = useState(pairs)
+  const [pairs, setAllPairs] = useState(pairsParam)
+
+  console.log(pairs)
 
   return (
-    <div className="tabPanel">
-      {allPairs.map((pair, i) => (
+    <div className="tabPanel" style={{ maxWidth: '100%' }}>
+      {pairs.map((pair, i) => (
         <Box key={i}>
           <Pair
-            allPairs={allPairs}
+            allPairs={pairs}
             index={i}
             onDelete={deletePair}
             pair={pair}
+            readOnly={readOnly}
             setPair={setPair}
             setter={setter}
           />
         </Box>
       ))}
 
-      <Box>
-        <Button
-          variant="contained"
-          onClick={() => addPair(pairs, setter)}
-        >Add</Button>
-      </Box>
+      { !readOnly && (
+        <Box>
+          <Button variant="contained" onClick={() => typeof addPair !== 'undefined' && addPair(pairs, setter)}>Add</Button>
+        </Box>
+      )}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 // @flow
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import AceEditor from 'react-ace'
 import toUpper from 'lodash/toUpper'
 
@@ -32,43 +32,62 @@ const OTHER_BODY_TYPES = [
 ]
 
 type PropsT = {
-  addPair: Function,
+  addPair?: Function,
   body: BodyT,
-  bodyType: BodyTypeT,
-  deletePair: Function,
-  dispatchBody: Function,
-  setBodyType: Function,
-  setPair: Function,
+  bodyType: ?BodyTypeT,
+  deletePair?: Function,
+  dispatchBody?: Function,
+  readOnly?: Boolean,
+  setBodyType?: Function,
+  setPair?: Function,
 }
 
 function Body(props: PropsT): Element<typeof Box> {
   const {
     addPair,
-    body,
+    body: bodyProp,
     bodyType,
     deletePair,
     dispatchBody,
+    readOnly = false,
     setBodyType,
     setPair,
   } = props
 
   function changeBody(type, newBody): void {
-    dispatchBody({ type, payload: newBody })
+    !readOnly && typeof dispatchBody !== 'undefined' && dispatchBody({ type, payload: newBody })
   }
 
   function pairSetter(newBody): void {
-    changeBody('updateFormUrlEncoded', newBody)
+    !readOnly && changeBody('updateFormUrlEncoded', newBody)
   }
+
+  const [body, setBody] = useState(bodyProp)
+
+  useEffect(() => {
+    setBody(bodyProp)
+  }, [bodyProp])
 
   return (
     <Box>
-      <NativeSelect value={bodyType} onChange={(e) => { console.log(e); setBodyType(e.target.value) }}>
-        {ACE_BODY_TYPES.concat(OTHER_BODY_TYPES).map(type => (
-          <option key={type} value={type}>{toUpper(type)}</option>
-        ))}
-      </NativeSelect>
+      { !readOnly && (
+        <NativeSelect value={bodyType} onChange={(e) => { typeof setBodyType !== 'undefined' && setBodyType(e.target.value) }}>
+          {ACE_BODY_TYPES.concat(OTHER_BODY_TYPES).map(type => (
+            <option key={type} value={type}>{toUpper(type)}</option>
+          ))}
+        </NativeSelect>
+      )}
 
-      { ACE_BODY_TYPES.includes(bodyType) && (
+      { readOnly && (
+        <AceEditor
+          mode={bodyType}
+          readOnly
+          theme="github"
+          value={body.Response}
+        />
+      )}
+
+      { !readOnly && ACE_BODY_TYPES.includes(bodyType) && (
         <AceEditor
           defaultValue={body.Ace}
           mode={bodyType}

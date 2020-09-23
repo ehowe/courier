@@ -16,10 +16,11 @@ import DeleteForeverTwoToneIcon from '@material-ui/icons/DeleteForeverTwoTone'
 type PropsT = {
   allPairs: Array<PairT>,
   index: number,
-  onDelete: Function,
+  onDelete?: Function,
   pair: PairT,
-  setPair: Function,
-  setter: Function,
+  readOnly?: boolean,
+  setPair?: Function,
+  setter?: Function,
 }
 
 function Pair(props: PropsT): Element<typeof Fragment> {
@@ -28,6 +29,7 @@ function Pair(props: PropsT): Element<typeof Fragment> {
     index,
     onDelete,
     pair,
+    readOnly = false,
     setPair,
     setter,
   } = props
@@ -42,12 +44,16 @@ function Pair(props: PropsT): Element<typeof Fragment> {
 
   return (
     <Fragment>
-      <TextField placeholder="Key" label="Key" defaultValue={key} onChange={(e) => setKey(e.target.value)} onBlur={updatePair}/>
-      <TextField placeholder="Value" label="Value" defaultValue={value} onChange={(e) => setValue(e.target.value) } onBlur={updatePair}/>
-      <Checkbox checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/>
-      <IconButton color="primary" aria-label="Delete" component="span" onClick={() => onDelete(allPairs, setter, index)}>
-        <DeleteForeverTwoToneIcon />
-      </IconButton>
+      <TextField disabled={readOnly} placeholder="Key" label="Key" defaultValue={key} onChange={(e) => setKey(e.target.value)} onBlur={updatePair}/>
+      <TextField disabled={readOnly} placeholder="Value" label="Value" defaultValue={value} onChange={(e) => setValue(e.target.value) } onBlur={updatePair}/>
+      { !readOnly && (
+        <Fragment>
+          <Checkbox checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/> }
+          <IconButton color="primary" aria-label="Delete" component="span" onClick={() => onDelete(allPairs, setter, index)}>
+            <DeleteForeverTwoToneIcon />
+          </IconButton>
+        </Fragment>
+      )}
     </Fragment>
   )
 }
