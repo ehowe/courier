@@ -1,6 +1,7 @@
 // @flow
 
 import React, { Fragment, useState } from 'react'
+import classNames from 'classnames'
 
 import type { Element } from 'react'
 import type {
@@ -44,12 +45,12 @@ function Pair(props: PropsT): Element<typeof Fragment> {
 
   return (
     <Fragment>
-      <TextField disabled={readOnly} placeholder="Key" label="Key" defaultValue={key} onChange={(e) => setKey(e.target.value)} onBlur={updatePair}/>
-      <TextField disabled={readOnly} placeholder="Value" label="Value" defaultValue={value} onChange={(e) => setValue(e.target.value) } onBlur={updatePair}/>
+      <TextField className={classNames('pairText', { disabled: readOnly })} disabled={readOnly} placeholder="Key" label="Key" defaultValue={key} onChange={(e) => setKey(e.target.value)} onBlur={updatePair}/>
+      <TextField className={classNames('pairText', { disabled: readOnly })}disabled={readOnly} placeholder="Value" label="Value" defaultValue={value} onChange={(e) => setValue(e.target.value) } onBlur={updatePair}/>
       { !readOnly && (
         <Fragment>
-          <Checkbox checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/> }
-          <IconButton color="primary" aria-label="Delete" component="span" onClick={() => onDelete(allPairs, setter, index)}>
+          <Checkbox className={classNames('pairAction')} checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/>
+          <IconButton className={classNames('pairAction')} color="primary" aria-label="Delete" component="span" onClick={() => onDelete(allPairs, setter, index)}>
             <DeleteForeverTwoToneIcon />
           </IconButton>
         </Fragment>

@@ -72,8 +72,6 @@ function Request(props: PropsT): Element<typeof Paper> {
     const activeQueries = queries.filter(pairFilter).reduce(pairReducer, {})
     const activeHeaders = headers.filter(pairFilter).reduce(pairReducer, {})
 
-    const client = axios.create({ baseURL: url, headers: { ...activeHeaders, 'Accept': `application/${bodyType}`, 'Content-Type': `application/${bodyType}` } })
-
     let data
 
     if (bodyType === 'x-www-form-urlencoded') {
@@ -83,10 +81,18 @@ function Request(props: PropsT): Element<typeof Paper> {
       data = body.Ace
     }
 
-    client.request({
-      method: selectedRequest,
-      params: activeQueries,
-      data: data,
+    axios.post('http://localhost:2468/api', {
+      data: {
+        data,
+        url,
+        method: selectedRequest,
+        params: activeQueries,
+        headers: {
+          ...activeHeaders,
+          'Accept': `application/${bodyType}`,
+          'Content-Type': `application/${bodyType}`,
+        },
+      },
     }).then((res: any) => {
       const response: ResponseT = transformResponse(res)
       dispatchResponse({ type: 'setResponse', payload: response })
@@ -103,9 +109,8 @@ function Request(props: PropsT): Element<typeof Paper> {
 
   function transformResponse(res: any): ResponseT {
     const headerReducer = (array: Array<PairT>, key: string): Array<PairT> => ([...array, { key: key, value: res.headers[key], enabled: true }])
-    const body = JSON.stringify(res.data)
+    const body = JSON.stringify(res.data, null, 2)
     const headers = Object.keys(res.headers).reduce(headerReducer, [])
-    console.log(headers)
     return { body: { Response: body }, code: res.status, headers: headers }
   }
 
@@ -130,24 +135,25 @@ function Request(props: PropsT): Element<typeof Paper> {
   }
 
   return (
-    <Paper className="Request">
-      <Toolbar>
-        <NativeSelect
-          value={selectedRequest}
-          onChange={(e: SyntheticEvent<HTMLInputElement>): void => setSelectedRequest(e.currentTarget.value)}
-        >
-          {REQUESTS.map((request: string): React.Element<'option'> => (
-            <option key={request} value={request}>{upperCase(request)}</option>
-          ))}
-        </NativeSelect>
-        <Box component="span">
-          <TextField label="Enter URL" onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) } defaultValue={url}/>
-        </Box>
-        <Box component="span">
-          <Button onClick={submitRequest}>Send</Button>
-        </Box>
-      </Toolbar>
-      <Box>
+    <Paper className="Request" style={{ height: '100%' }}>
+      <Box style={{ height: '112px' }}>
+        <Toolbar>
+          <NativeSelect
+            value={selectedRequest}
+            onChange={(e: SyntheticEvent<HTMLInputElement>): void => setSelectedRequest(e.currentTarget.value)}
+            style={{ marginRight: '1em' }}
+          >
+            {REQUESTS.map((request: string): React.Element<'option'> => (
+              <option key={request} value={request}>{upperCase(request)}</option>
+            ))}
+          </NativeSelect>
+          <Box component="span" style={{ width: '75%' }}>
+            <TextField label="Enter URL" style={{ width: '100%' }} onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) } defaultValue={url}/>
+          </Box>
+          <Box component="span" justify-self="right">
+            <Button onClick={submitRequest}>Send</Button>
+          </Box>
+        </Toolbar>
         <AppBar position="static">
           <Tabs value={activeTab}>
             <Tab onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
@@ -156,6 +162,8 @@ function Request(props: PropsT): Element<typeof Paper> {
             <Tab onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
           </Tabs>
         </AppBar>
+      </Box>
+      <Box style={{ height: 'calc(100% - 112px)' }}>
         { activeTab === 'body' && (
           <Body
             addPair={addPair}

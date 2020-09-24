@@ -1,6 +1,11 @@
+// @flow
+
 import * as React from 'react'
+import type { Element } from 'react'
 
 import type {
+  BodyTypeT,
+  PairT,
   ResponseT,
 } from '../types'
 
@@ -23,38 +28,45 @@ function Response(props: PropsT): Element<typeof Paper> {
     response,
   } = props
 
-  function getBodyType(): string {
-    return 'json'
+  function getBodyType(): BodyTypeT {
+    const contentTypeHeader: PairT = response.headers.find((header: PairT): boolean => header.key === 'content-type')
+
+    if (!contentTypeHeader) {
+      return 'json' // default to json so Ace doesn't explode
+    }
+
+    const rawValue: string = contentTypeHeader.value.split(';')[0]
+    const type: string = rawValue.split('/')[1]
+    return type
   }
 
+  const [activeTab: string, setActiveTab: Function] = React.useState('body')
   const [body, setBody] = React.useState(response.body)
-  const [headers, setHeaders] = React.useState(response.headers)
+  const [headers: Array<PairT>, setHeaders: Function] = React.useState(response.headers)
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     setBody(response.body)
   }, [response.body])
 
-  React.useEffect(() => {
+  React.useEffect((): void => {
     setHeaders(response.headers)
   }, [response.headers])
 
-  console.log(headers)
-
-  const [activeTab: string, setActiveTab: Function] = React.useState('body')
-
   return (
-    <Paper className="Response">
-      <Toolbar>
-        <Box component="span" style={{ height: '2rem' }}>
-        </Box>
-      </Toolbar>
-      <Box>
+    <Paper className="Response" style={{ height: '100%' }}>
+      <Box style={{ height: '112px' }}>
+        <Toolbar>
+          <Box component="span" style={{ height: '2rem' }}>
+          </Box>
+        </Toolbar>
         <AppBar position="static">
           <Tabs value={activeTab}>
             <Tab onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
             <Tab onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
           </Tabs>
         </AppBar>
+      </Box>
+      <Box style={{ height: 'calc(100% - 112px)' }}>
         { activeTab === 'body' && (
           <Body
             body={body}

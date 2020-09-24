@@ -32,6 +32,7 @@ const OTHER_BODY_TYPES = [
 ]
 
 type PropsT = {
+  aceHeight?: string,
   addPair?: Function,
   body: BodyT,
   bodyType: ?BodyTypeT,
@@ -69,21 +70,25 @@ function Body(props: PropsT): Element<typeof Box> {
   }, [bodyProp])
 
   return (
-    <Box>
+    <Box style={{ height: '100%', position: 'relative' }}>
       { !readOnly && (
-        <NativeSelect value={bodyType} onChange={(e) => { typeof setBodyType !== 'undefined' && setBodyType(e.target.value) }}>
-          {ACE_BODY_TYPES.concat(OTHER_BODY_TYPES).map(type => (
-            <option key={type} value={type}>{toUpper(type)}</option>
-          ))}
-        </NativeSelect>
+        <Box style={{ height: '30px' }}>
+          <NativeSelect value={bodyType} onChange={(e) => { typeof setBodyType !== 'undefined' && setBodyType(e.target.value) }}>
+            {ACE_BODY_TYPES.concat(OTHER_BODY_TYPES).map(type => (
+              <option key={type} value={type}>{toUpper(type)}</option>
+            ))}
+          </NativeSelect>
+        </Box>
       )}
 
       { readOnly && (
         <AceEditor
+          height="100%"
           mode={bodyType}
           readOnly
           theme="github"
           value={body.Response}
+          width="100%"
         />
       )}
 
@@ -93,6 +98,8 @@ function Body(props: PropsT): Element<typeof Box> {
           mode={bodyType}
           onBlur={(e) => changeBody('updateAce', e.target.value)}
           theme="github"
+          style={{ height: 'calc(100% - 30px)' }}
+          width="100%"
         />
       )}
 

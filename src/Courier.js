@@ -25,12 +25,12 @@ function Courier(): Element<typeof Container> {
   }
 
   return (
-    <Container maxWidth="lg" className="Courier">
-      <Grid container direction="row" spacing={2}>
-        <Grid item md={6}>
+    <Container className="Courier" disableGutters maxWidth={false} style={{ flex: '1 1 auto', height: '100%' }}>
+      <Grid container direction="row" spacing={2} style={{ height: '100%' }}>
+        <Grid item md={6} style={{ height: '100%' }}>
           <Request dispatchResponse={dispatchResponse}/>
         </Grid>
-        <Grid item md={6}>
+        <Grid item md={6} style={{ height: '100%' }}>
           <Response response={response}/>
         </Grid>
       </Grid>

@@ -1,0 +1,27 @@
+body {
+  height: 99vh;
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+
+div#root {
+  height: 100%;
+  width: 100%;
+}
+
+.pairText {
+  width: 45%;
+}
+
+.pairText.disabled {
+  width: 50%;
+}
+
+.pairAction {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 5%;
+}

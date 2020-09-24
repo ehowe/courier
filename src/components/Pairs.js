@@ -37,8 +37,6 @@ function Pairs(props: PropsT): Element<'div'> {
 
   const [pairs, setAllPairs] = useState(pairsParam)
 
-  console.log(pairs)
-
   return (
     <div className="tabPanel" style={{ maxWidth: '100%' }}>
       {pairs.map((pair, i) => (
