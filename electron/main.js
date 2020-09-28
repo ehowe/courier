@@ -1,5 +1,6 @@
 const { app, BrowserWindow } = require('electron')
 const axios = require('axios')
+const config = require('electron-json-config')
 const cors = require('cors')
 const express = require('express')
 const https = require('https')
@@ -12,14 +13,40 @@ require('electron-reload')(__dirname, {
 
 let mainWindow
 
+const workspaceTemplate = {
+  url: '',
+  name: 'default',
+}
+
+const configTemplate = {
+  workspaces: [
+    workspaceTemplate,
+  ],
+}
+
 function createWindow() {
   const expressApp = express()
   expressApp.use(express.json())
   expressApp.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Methods', '*')
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
     next()
   })
+
+  expressApp.get('/config', cors(), (req, res, next) => {
+    if (Object.entries(config.all()).length === 0) {
+      config.setBulk({ ...configTemplate })
+    }
+    return res.status(200).send(config.all())
+  })
+
+  expressApp.put('/config', cors(), (req, res, next) => {
+    config.setBulk({ ...req.body })
+
+    return res.status(200).send(config.all())
+  })
+
   expressApp.post('/api', cors(), (req, res, next) => {
     const {
       data,

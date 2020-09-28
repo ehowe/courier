@@ -23,6 +23,8 @@ import TextField from '@material-ui/core/TextField'
 import Body from './Body'
 import Pairs from './Pairs'
 
+import { ConfigContext } from './ConfigProvider'
+
 import './Request.css'
 
 import axios from 'axios'
@@ -47,13 +49,19 @@ function Request(props: PropsT): Element<typeof Paper> {
     dispatchResponse,
   } = props
 
+  const config = React.useContext(ConfigContext)
+
+  React.useEffect(() => {
+    setUrl(config.url)
+  }, [config])
+
   const [activeTab: string, setActiveTab: Function] = React.useState('query')
   const [body: BodyT, dispatchBody: Function] = React.useReducer(bodyReducer, { 'Ace': '', 'FormUrlEncoded': [] })
   const [bodyType: string, setBodyType: Function] = React.useState('json')
   const [headers: Array<PairT>, setHeaders: Function] = React.useState([{ key: '', value: '', enabled: false }])
   const [queries: Array<PairT>, setQueries: Function] = React.useState([{ key: '', value: '', enabled: false }])
   const [selectedRequest: string, setSelectedRequest: Function] = React.useState(REQUESTS[1])
-  const [url: string, setUrl: Function] = React.useState('https://jsonplaceholder.typicode.com/posts')
+  const [url: string, setUrl: Function] = React.useState(config.url)
 
   function bodyReducer(state: BodyT, action: { type: string, payload: any }): BodyT {
     switch (action.type) {
@@ -148,7 +156,13 @@ function Request(props: PropsT): Element<typeof Paper> {
             ))}
           </NativeSelect>
           <Box component="span" style={{ width: '75%' }}>
-            <TextField label="Enter URL" style={{ width: '100%' }} onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) } defaultValue={url}/>
+            <TextField
+              label="URL"
+              style={{ width: '100%' }}
+              value={url || ''}
+              InputLabelProps={{ shrink: true }}
+              onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) }
+            />
           </Box>
           <Box component="span" justify-self="right">
             <Button onClick={submitRequest}>Send</Button>

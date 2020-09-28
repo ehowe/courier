@@ -5,9 +5,7 @@ import Courier from './Courier'
 import * as serviceWorker from './serviceWorker'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Courier />
-  </React.StrictMode>,
+  <Courier />,
   document.getElementById('root'),
 )
 
