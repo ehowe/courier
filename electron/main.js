@@ -1,3 +1,7 @@
+const {
+  configTemplate,
+} = require('../src/configTemplate')
+
 const { app, BrowserWindow } = require('electron')
 const axios = require('axios')
 const config = require('electron-json-config')
@@ -12,17 +16,6 @@ require('electron-reload')(__dirname, {
 })
 
 let mainWindow
-
-const workspaceTemplate = {
-  url: '',
-  name: 'default',
-}
-
-const configTemplate = {
-  workspaces: [
-    workspaceTemplate,
-  ],
-}
 
 function createWindow() {
   const expressApp = express()

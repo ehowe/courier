@@ -2,9 +2,15 @@
 
 import * as React from 'react'
 
+import upperCase from 'lodash/upperCase'
+
 import type { Element } from 'react'
 
 import { ConfigContext, ConfigDispatchContext } from './ConfigProvider'
+import { REQUESTS } from './Request'
+import RequestLabel from './RequestLabel'
+
+import { workspaceTemplate, requestTemplate } from '../configTemplate'
 
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
@@ -14,6 +20,9 @@ import DialogContent from '@material-ui/core/DialogContent'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import FormControl from '@material-ui/core/FormControl'
 import InputLabel from '@material-ui/core/InputLabel'
+import List from '@material-ui/core/List'
+import ListItem from '@material-ui/core/ListItem'
+import ListItemText from '@material-ui/core/ListItemText'
 import MenuItem from '@material-ui/core/MenuItem'
 import Paper from '@material-ui/core/Paper'
 import Select from '@material-ui/core/Select'
@@ -24,13 +33,22 @@ function Workspaces(): Element<typeof Paper> {
   const dispatchConfig = React.useContext(ConfigDispatchContext)
 
   const [createWorkspaceOpen: boolean, setCreateWorkspaceOpen: Function] = React.useState(false)
+  const [createRequestOpen: boolean, setCreateRequestOpen: Function] = React.useState(false)
   const [workspaces, setWorkspaces] = React.useState([])
   const [defaultWorkspace, setDefaultWorkspace] = React.useState('')
   const [newWorkspaceName, setNewWorkspaceName] = React.useState('')
+  const [newRequestName, setNewRequestName] = React.useState('')
+  const [newRequestMethod, setNewRequestMethod] = React.useState(REQUESTS[0])
+  const [activeWorkspace, setActiveWorkspace] = React.useState(workspaceTemplate)
+  const [activeRequest, setActiveRequest] = React.useState(requestTemplate)
+  const [requests, setRequests] = React.useState([requestTemplate])
 
   React.useEffect(() => {
+    console.log('in effect')
     const {
+      activeWorkspace,
       defaultWorkspace,
+      activeRequest,
       workspaces,
     } = config
 
@@ -45,6 +63,10 @@ function Workspaces(): Element<typeof Paper> {
     } else {
       setDefaultWorkspace(defaultWorkspace)
     }
+
+    setActiveWorkspace(activeWorkspace)
+    setActiveRequest(activeRequest)
+    setRequests(activeWorkspace.requests)
   }, [config])
 
   function handleWorkspaceSelect(e) {
@@ -56,11 +78,24 @@ function Workspaces(): Element<typeof Paper> {
   function createWorkspace() {
     dispatchConfig({ type: 'createNewWorkspace', payload: newWorkspaceName, updateConfig: true })
     setCreateWorkspaceOpen(false)
-    dispatchConfig({ type: 'setDefaultWorkspace', payload: newWorkspaceName })
+    dispatchConfig({ type: 'setDefaultWorkspace', payload: newWorkspaceName, updateConfig: true })
+  }
+
+  function createRequest() {
+    dispatchConfig({ type: 'createNewRequest', payload: { name: newRequestName, method: newRequestMethod }, updateConfig: true })
+    setCreateRequestOpen(false)
+  }
+
+  function handleRequestSelect(name) {
+    dispatchConfig({ type: 'setDefaultRequest', payload: name, updateConfig: true })
   }
 
   function newWorkspaceValid(): boolean {
     return workspaces.map(workspace => workspace.name).includes(newWorkspaceName)
+  }
+
+  function newRequestValid(): boolean {
+    return activeWorkspace.requests.map(request => request.name).includes(newRequestName) && activeWorkspace.requests.map(request => request.method).includes(newRequestMethod)
   }
 
   return (
@@ -87,6 +122,35 @@ function Workspaces(): Element<typeof Paper> {
           </Button>
         </DialogActions>
       </Dialog>
+      <Dialog open={createRequestOpen} onClose={() => setCreateRequestOpen(false)} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create New Request</DialogTitle>
+        <DialogContent style={{ display: 'flex' }}>
+          <TextField
+            autoFocus
+            error={newRequestValid()}
+            helperText={newRequestValid() && 'Name already taken'}
+            label="Request Name"
+            onChange={(e) => setNewRequestName(e.target.value)}
+          />
+          <Select
+            style={{ width: '100px' }}
+            value={newRequestMethod}
+            onChange={(e: SyntheticEvent<HTMLInputElement>): void => setNewRequestMethod(e.target.value)}
+          >
+            {REQUESTS.map((request: string): React.Element<'option'> => (
+              <MenuItem key={request} value={request}>{upperCase(request)}</MenuItem>
+            ))}
+          </Select>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateRequestOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button disabled={newRequestValid()} onClick={createRequest} color="primary">
+            Create
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Paper className="Workspaces" style={{ height: '100%' }}>
         <Box style={{ height: '112px' }}>
           <FormControl style={{ width: '100%' }}>
@@ -104,7 +168,17 @@ function Workspaces(): Element<typeof Paper> {
           </FormControl>
         </Box>
         <Box style={{ height: 'calc(100% - 112px)' }}>
-
+          <List>
+            { requests.map((request, index) => (
+              <ListItem button key={index} alignItems="flex-start" style={{ alignItems: 'center' }} selected={request.name === activeRequest.name} onClick={() => handleRequestSelect(request.name)}>
+                <RequestLabel request={request.method} />
+                <ListItemText primary={request.name} />
+              </ListItem>
+            ))}
+            <ListItem button alignItems="flex-start">
+              <ListItemText primary="Add new request" onClick={() => setCreateRequestOpen(true)}/>
+            </ListItem>
+          </List>
         </Box>
       </Paper>
     </div>

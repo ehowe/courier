@@ -23,7 +23,7 @@ import TextField from '@material-ui/core/TextField'
 import Body from './Body'
 import Pairs from './Pairs'
 
-import { ConfigContext } from './ConfigProvider'
+import { ConfigContext, ConfigDispatchContext } from './ConfigProvider'
 
 import './Request.css'
 
@@ -31,12 +31,13 @@ import axios from 'axios'
 import qs from 'qs'
 import upperCase from 'lodash/upperCase'
 
-const REQUESTS: Array<string> = [
+export const REQUESTS: Array<string> = [
   'get',
   'post',
   'put',
   'patch',
   'delete',
+  'options',
   'head',
 ]
 
@@ -50,10 +51,15 @@ function Request(props: PropsT): Element<typeof Paper> {
   } = props
 
   const config = React.useContext(ConfigContext)
+  const dispatchConfig = React.useContext(ConfigDispatchContext)
 
   React.useEffect(() => {
-    setUrl(config.url)
-  }, [config])
+    if (typeof config.activeRequest !== 'undefined') {
+      setUrl(config.activeRequest.url)
+      setQueries(config.activeRequest.queries)
+      setHeaders(config.activeRequest.headers)
+    }
+  }, [config.activeRequest])
 
   const [activeTab: string, setActiveTab: Function] = React.useState('query')
   const [body: BodyT, dispatchBody: Function] = React.useReducer(bodyReducer, { 'Ace': '', 'FormUrlEncoded': [] })
@@ -61,7 +67,7 @@ function Request(props: PropsT): Element<typeof Paper> {
   const [headers: Array<PairT>, setHeaders: Function] = React.useState([{ key: '', value: '', enabled: false }])
   const [queries: Array<PairT>, setQueries: Function] = React.useState([{ key: '', value: '', enabled: false }])
   const [selectedRequest: string, setSelectedRequest: Function] = React.useState(REQUESTS[1])
-  const [url: string, setUrl: Function] = React.useState(config.url)
+  const [url: string, setUrl: Function] = React.useState('')
 
   function bodyReducer(state: BodyT, action: { type: string, payload: any }): BodyT {
     switch (action.type) {
@@ -125,12 +131,16 @@ function Request(props: PropsT): Element<typeof Paper> {
   function addPair(pairs, setter): void {
     const newPairs = pairs.concat({ key: '', value: '', enabled: false })
 
+    updateConfigPairs(newPairs)
+
     setter(newPairs)
   }
 
   function deletePair(pairs, setter, index): void {
     const newPairs = [...pairs]
     newPairs.splice(index, 1)
+
+    updateConfigPairs(newPairs)
 
     setter(newPairs)
   }
@@ -139,7 +149,32 @@ function Request(props: PropsT): Element<typeof Paper> {
     const newPair = { ...pair, key, value, enabled }
     const newPairs = allPairs
     newPairs[index] = newPair
+
+    updateConfigPairs(newPairs)
+
     setter(newPairs)
+  }
+
+  function updateConfigPairs(payload) {
+    let type
+
+    switch (activeTab) {
+      case 'query':
+        type = 'updateWorkspaceQueries'
+        break
+      case 'headers':
+        type = 'updateWorkspaceHeaders'
+        break
+      default:
+        throw new Error()
+    }
+
+    dispatchConfig({ type, payload, updateConfig: true })
+  }
+
+  function handleUrlChange(e: SyntheticEvent<HTMLInputElement>): void {
+    setUrl(e.target.value)
+    dispatchConfig({ type: 'updateWorkspaceUrl', payload: e.target.value, updateConfig: true })
   }
 
   return (
@@ -159,9 +194,9 @@ function Request(props: PropsT): Element<typeof Paper> {
             <TextField
               label="URL"
               style={{ width: '100%' }}
-              value={url || ''}
+              value={url}
               InputLabelProps={{ shrink: true }}
-              onChange={(e: SyntheticEvent<HTMLInputElement>): void => setUrl(e.currentTarget.value) }
+              onChange={handleUrlChange}
             />
           </Box>
           <Box component="span" justify-self="right">
