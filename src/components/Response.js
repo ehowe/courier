@@ -16,6 +16,8 @@ import Tab from '@material-ui/core/Tab'
 import Tabs from '@material-ui/core/Tabs'
 import Toolbar from '@material-ui/core/Toolbar'
 
+import { responseTemplate } from '../configTemplate'
+import { ConfigContext } from './ConfigProvider'
 import Body from './Body'
 import Pairs from './Pairs'
 
@@ -25,8 +27,23 @@ type PropsT = {
 
 function Response(props: PropsT): Element<typeof Paper> {
   const {
-    response,
+    response: responseProp,
   } = props
+
+  console.log(responseTemplate)
+
+  const [response, setResponse] = React.useState(responseTemplate)
+  const config = React.useContext(ConfigContext)
+
+  React.useEffect(() => {
+    if (typeof config.activeRequest !== 'undefined') {
+      setResponse(config.activeRequest.response)
+    }
+  }, [config.activeRequest])
+
+  React.useEffect(() => {
+    setResponse(responseProp)
+  }, [responseProp])
 
   function getBodyType(): BodyTypeT {
     const contentTypeHeader: PairT = response.headers.find((header: PairT): boolean => header.key === 'content-type')

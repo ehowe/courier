@@ -1,11 +1,18 @@
+exports.responseTemplate = {
+  code: 0,
+  body: { Response: '' },
+  headers: [],
+}
+
 exports.requestTemplate = {
   body: { Ace: '{}', FormUrlEncoded: [] },
   bodyType: 'json',
-  url: '',
+  headers: [],
   method: 'get',
   name: 'default',
   queries: [],
-  headers: [],
+  url: '',
+  response: exports.responseTemplate,
 }
 
 exports.workspaceTemplate = {

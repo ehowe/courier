@@ -37,7 +37,7 @@ function Courier(): Element<typeof ConfigProvider> {
             <Request dispatchResponse={dispatchResponse}/>
           </Grid>
           <Grid item md={5} style={{ height: '100%' }}>
-            <Response response={response}/>
+            <Response response={response} />
           </Grid>
         </Grid>
       </Container>

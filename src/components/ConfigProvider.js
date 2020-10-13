@@ -118,6 +118,9 @@ function configReducer(state: any, action: { type?: string, payload: any, update
     case 'updateRequestQueries':
       newState = updateRequest(newState, 'queries', action.payload)
       break
+    case 'updateRequestResponse':
+      newState = updateRequest(newState, 'response', action.payload)
+      break
     case 'updateRequestUrl':
       newState = updateRequest(newState, 'url', action.payload)
       break

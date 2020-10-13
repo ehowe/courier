@@ -66,11 +66,11 @@ function Request(props: PropsT): Element<typeof Paper> {
         payload = config.activeRequest.body.Ace
       }
 
+      setSelectedRequest(config.activeRequest.method)
       setUrl(config.activeRequest.url)
       setQueries(config.activeRequest.queries)
       setHeaders(config.activeRequest.headers)
       setBodyType(config.activeRequest.bodyType)
-      console.log({ type: action, payload })
       dispatchBody({ type: action, payload })
     }
   }, [config.activeRequest])
@@ -123,7 +123,7 @@ function Request(props: PropsT): Element<typeof Paper> {
       },
     }).then((res: any) => {
       const response: ResponseT = transformResponse(res)
-      dispatchResponse({ type: 'setResponse', payload: response })
+      handleResponseChange(response)
     }).catch((err: any) => {
       if (err.response) {
         console.log('got response')
@@ -218,6 +218,11 @@ function Request(props: PropsT): Element<typeof Paper> {
     if (type === 'x-www-form-urlencoded') {
       dispatchBody({ type: 'updateFormUrlEncoded', payload: [] })
     }
+  }
+
+  function handleResponseChange(response: ResponseT): void {
+    dispatchResponse({ type: 'setResponse', payload: response })
+    dispatchConfig({ type: 'updateRequestResponse', payload: response, updateConfig: true })
   }
 
   return (
