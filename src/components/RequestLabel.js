@@ -31,7 +31,7 @@ function RequestLabel(props: PropsT) {
   }
 
   return (
-    <span style={{ color: getRequestColor(), width: '50px' }}>{upperCase(props.request)}</span>
+    <span style={{ color: getRequestColor(), minWidth: '75px' }}>{upperCase(props.request)}</span>
   )
 }
 

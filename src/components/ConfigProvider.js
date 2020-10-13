@@ -22,14 +22,27 @@ function getCurrentWorkspaceIndex(currentState: any): number {
   return currentState.workspaces.findIndex(workspace => workspace.name === currentState.activeWorkspace.name)
 }
 
+function getCurrentRequestIndex(currentState: any): number {
+  const workspace = currentState.workspaces[getCurrentWorkspaceIndex(currentState)]
+  return workspace.requests.findIndex(request => request.name === currentState.activeRequest.name && request.method === currentState.activeRequest.method)
+}
+
 function updateWorkspace(currentState: any, attribute: string, payload: any): any {
-  const newState = currentState
+  const newState = { ...currentState }
   const attributes = { ...newState.activeWorkspace, [attribute]: payload }
 
   newState.workspaces[getCurrentWorkspaceIndex(currentState)] = attributes
   newState.activeWorkspace = attributes
 
   return newState
+}
+
+function updateRequest(currentState: any, attribute: string, payload: string): any {
+  const workspace = { ...currentState.workspaces[getCurrentWorkspaceIndex(currentState)] }
+  const requests = [...workspace.requests]
+  requests[getCurrentRequestIndex(currentState)] = { ...currentState.activeRequest, [attribute]: payload }
+
+  return updateWorkspace(currentState, 'requests', requests)
 }
 
 function addRequestToWorkspace(currentState: any, payload: { name: string, method: string }): any {
@@ -39,6 +52,24 @@ function addRequestToWorkspace(currentState: any, payload: { name: string, metho
 
   const newState = updateWorkspace(currentState, 'defaultRequest', payload.name)
   return updateWorkspace(newState, 'requests', requests)
+}
+
+function removeRequestFromWorkspace(currentState: any, payload: { name: string, method: string }): any {
+  const workspace = currentState.workspaces[getCurrentWorkspaceIndex(currentState)]
+  const active = currentState.activeRequest.name === payload.name && currentState.activeRequest.method === payload.method
+  console.log(workspace.requests)
+  const requests = workspace.requests.filter(request => !(request.name === payload.name && request.method === payload.method))
+
+  let newState = updateWorkspace(currentState, 'requests', requests)
+
+  if (active && requests.length > 0) {
+    newState.activeRequest = requests[0]
+    newState = updateWorkspace(newState, 'defaultRequest', newState.activeRequest.name)
+  } else if (active && requests.length === 0) {
+    newState = updateWorkspace(newState, 'defaultRequest', '')
+  }
+
+  return newState
 }
 
 function setDefaultRequest(currentState: any, payload: string): any {
@@ -58,8 +89,10 @@ function configReducer(state: any, action: { type?: string, payload: any, update
       newState = { ...newState, workspaces: [...state.workspaces, { ...workspaceTemplate, name: action.payload }] }
       break
     case 'createNewRequest':
-      console.log('creating request')
       newState = addRequestToWorkspace(newState, action.payload)
+      break
+    case 'deleteRequest':
+      newState = removeRequestFromWorkspace(newState, action.payload)
       break
     case 'setActiveRequest':
       newState = { ...newState, activeRequest: action.payload }
@@ -73,25 +106,32 @@ function configReducer(state: any, action: { type?: string, payload: any, update
     case 'setDefaultWorkspace':
       newState = { ...newState, defaultWorkspace: action.payload }
       break
-    case 'updateWorkspaceHeaders':
-      newState = updateWorkspace(newState, 'headers', action.payload)
+    case 'updateRequestBody':
+      newState = updateRequest(newState, 'body', action.payload)
       break
-    case 'updateWorkspaceQueries':
-      newState = updateWorkspace(newState, 'queries', action.payload)
+    case 'updateRequestBodyType':
+      newState = updateRequest(newState, 'bodyType', action.payload)
       break
-    case 'updateWorkspaceUrl':
-      newState = updateWorkspace(newState, 'url', action.payload)
+    case 'updateRequestHeaders':
+      newState = updateRequest(newState, 'headers', action.payload)
+      break
+    case 'updateRequestQueries':
+      newState = updateRequest(newState, 'queries', action.payload)
+      break
+    case 'updateRequestUrl':
+      newState = updateRequest(newState, 'url', action.payload)
+      break
+    case 'updateRequestMethod':
+      newState = updateRequest(newState, 'method', action.payload)
       break
     default:
       newState = { ...newState, ...action.payload, activeWorkspace: workspaceTemplate, activeRequest: requestTemplate }
   }
 
   if (action.updateConfig) {
-    console.log('updating config', newState)
     putConfig(omit(newState, ['activeWorkspace', 'activeRequest']))
   }
 
-  console.log('exiting reducer', newState)
   return newState
 }
 
@@ -130,8 +170,6 @@ const ConfigProvider = ({ children }) => {
 
     dispatch({ type: 'setActiveRequest', payload: request })
   }, [state.defaultWorkspace, state.workspaces, state.activeWorkspace, state.activeRequest])
-
-  console.log('provider state', state)
 
   return (
     <ConfigDispatchContext.Provider value={dispatch}>

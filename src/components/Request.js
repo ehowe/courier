@@ -55,9 +55,23 @@ function Request(props: PropsT): Element<typeof Paper> {
 
   React.useEffect(() => {
     if (typeof config.activeRequest !== 'undefined') {
+      let action
+      let payload
+
+      if (config.activeRequest.bodyType === 'x-www-form-urlencoded') {
+        action = 'updateFormUrlEncoded'
+        payload = config.activeRequest.body.FormUrlEncoded
+      } else {
+        action = 'updateAce'
+        payload = config.activeRequest.body.Ace
+      }
+
       setUrl(config.activeRequest.url)
       setQueries(config.activeRequest.queries)
       setHeaders(config.activeRequest.headers)
+      setBodyType(config.activeRequest.bodyType)
+      console.log({ type: action, payload })
+      dispatchBody({ type: action, payload })
     }
   }, [config.activeRequest])
 
@@ -160,10 +174,13 @@ function Request(props: PropsT): Element<typeof Paper> {
 
     switch (activeTab) {
       case 'query':
-        type = 'updateWorkspaceQueries'
+        type = 'updateRequestQueries'
         break
       case 'headers':
-        type = 'updateWorkspaceHeaders'
+        type = 'updateRequestHeaders'
+        break
+      case 'body':
+        type = 'updateRequestBody'
         break
       default:
         throw new Error()
@@ -174,7 +191,33 @@ function Request(props: PropsT): Element<typeof Paper> {
 
   function handleUrlChange(e: SyntheticEvent<HTMLInputElement>): void {
     setUrl(e.target.value)
-    dispatchConfig({ type: 'updateWorkspaceUrl', payload: e.target.value, updateConfig: true })
+    dispatchConfig({ type: 'updateRequestUrl', payload: e.target.value, updateConfig: true })
+  }
+
+  function handleMethodChange(e: SyntheticEvent<HTMLInputElement>): void {
+    setSelectedRequest(e.currentTarget.value)
+    dispatchConfig({ type: 'updateRequestMethod', payload: e.currentTarget.value, updateConfig: true })
+  }
+
+  function handleBodyChange(action): void {
+    const payload = { ...config.activeRequest.body }
+
+    if (bodyType === 'x-www-form-urlencoded') {
+      payload.FormUrlEncoded = action.payload
+    } else {
+      payload.Ace = action.payload
+    }
+
+    dispatchConfig({ type: 'updateRequestBody', payload, updateConfig: true })
+  }
+
+  function handleBodyTypeChange(type: string): void {
+    setBodyType(type)
+    dispatchConfig({ type: 'updateRequestBodyType', payload: type, updateConfig: true })
+
+    if (type === 'x-www-form-urlencoded') {
+      dispatchBody({ type: 'updateFormUrlEncoded', payload: [] })
+    }
   }
 
   return (
@@ -183,7 +226,7 @@ function Request(props: PropsT): Element<typeof Paper> {
         <Toolbar>
           <NativeSelect
             value={selectedRequest}
-            onChange={(e: SyntheticEvent<HTMLInputElement>): void => setSelectedRequest(e.currentTarget.value)}
+            onChange={handleMethodChange}
             style={{ marginRight: '1em' }}
           >
             {REQUESTS.map((request: string): React.Element<'option'> => (
@@ -219,8 +262,8 @@ function Request(props: PropsT): Element<typeof Paper> {
             body={body}
             bodyType={bodyType}
             deletePair={deletePair}
-            dispatchBody={dispatchBody}
-            setBodyType={setBodyType}
+            dispatchBody={handleBodyChange}
+            setBodyType={handleBodyTypeChange}
             setPair={setPair}
           />
         )}

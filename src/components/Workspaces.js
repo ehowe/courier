@@ -11,6 +11,7 @@ import { REQUESTS } from './Request'
 import RequestLabel from './RequestLabel'
 
 import { workspaceTemplate, requestTemplate } from '../configTemplate'
+import DeleteButton from './DeleteButton'
 
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
@@ -44,7 +45,6 @@ function Workspaces(): Element<typeof Paper> {
   const [requests, setRequests] = React.useState([requestTemplate])
 
   React.useEffect(() => {
-    console.log('in effect')
     const {
       activeWorkspace,
       defaultWorkspace,
@@ -86,7 +86,13 @@ function Workspaces(): Element<typeof Paper> {
     setCreateRequestOpen(false)
   }
 
-  function handleRequestSelect(name) {
+  function deleteRequest(value: string): void {
+    const [method, name] = value.split(/\s+/)
+
+    dispatchConfig({ type: 'deleteRequest', payload: { name, method }, updateConfig: true })
+  }
+
+  function handleRequestSelect(name: string) {
     dispatchConfig({ type: 'setDefaultRequest', payload: name, updateConfig: true })
   }
 
@@ -170,9 +176,10 @@ function Workspaces(): Element<typeof Paper> {
         <Box style={{ height: 'calc(100% - 112px)' }}>
           <List>
             { requests.map((request, index) => (
-              <ListItem button key={index} alignItems="flex-start" style={{ alignItems: 'center' }} selected={request.name === activeRequest.name} onClick={() => handleRequestSelect(request.name)}>
-                <RequestLabel request={request.method} />
-                <ListItemText primary={request.name} />
+              <ListItem button key={index} alignItems="flex-start" style={{ alignItems: 'center' }} selected={request.name === activeRequest.name}>
+                <RequestLabel request={request.method} onClick={() => handleRequestSelect(request.name)}/>
+                <ListItemText primary={request.name} onClick={() => handleRequestSelect(request.name)}/>
+                <DeleteButton onDelete={deleteRequest} value={request.method + ' ' + request.name}/>
               </ListItem>
             ))}
             <ListItem button alignItems="flex-start">

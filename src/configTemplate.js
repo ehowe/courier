@@ -1,4 +1,6 @@
 exports.requestTemplate = {
+  body: { Ace: '{}', FormUrlEncoded: [] },
+  bodyType: 'json',
   url: '',
   method: 'get',
   name: 'default',

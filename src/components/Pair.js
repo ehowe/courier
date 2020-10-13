@@ -8,11 +8,10 @@ import type {
   PairT,
 } from '../types'
 
-import Checkbox from '@material-ui/core/Checkbox'
-import IconButton from '@material-ui/core/IconButton'
-import TextField from '@material-ui/core/TextField'
+import DeleteButton from './DeleteButton'
 
-import DeleteForeverTwoToneIcon from '@material-ui/icons/DeleteForeverTwoTone'
+import Checkbox from '@material-ui/core/Checkbox'
+import TextField from '@material-ui/core/TextField'
 
 type PropsT = {
   allPairs: Array<PairT>,
@@ -50,9 +49,7 @@ function Pair(props: PropsT): Element<typeof Fragment> {
       { !readOnly && (
         <Fragment>
           <Checkbox className={classNames('pairAction')} checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/>
-          <IconButton className={classNames('pairAction')} color="primary" aria-label="Delete" component="span" onClick={() => onDelete(allPairs, setter, index)}>
-            <DeleteForeverTwoToneIcon />
-          </IconButton>
+          <DeleteButton className={classNames('pairAction')} onDelete={() => onDelete(allPairs, setter, index)} value={key + '/' + value} Element="span"/>
         </Fragment>
       )}
     </Fragment>
