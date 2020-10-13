@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 
 import type { Element } from 'react'
 import type {
@@ -9,6 +9,7 @@ import type {
 
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
+import Typography from '@material-ui/core/Typography'
 
 import Pair from './Pair'
 
@@ -38,20 +39,27 @@ function Pairs(props: PropsT): Element<'div'> {
   const [pairs, setAllPairs] = useState(pairsParam)
 
   return (
-    <div className="tabPanel" style={{ maxWidth: '100%' }}>
-      {pairs.map((pair, i) => (
-        <Box key={i}>
-          <Pair
-            allPairs={pairs}
-            index={i}
-            onDelete={deletePair}
-            pair={pair}
-            readOnly={readOnly}
-            setPair={setPair}
-            setter={setter}
-          />
-        </Box>
-      ))}
+    <div className="tabPanel" style={{ maxWidth: '100%', paddingTop: '1em' }}>
+      { pairs.length > 0 ? (
+        <div style={{ paddingBottom: '1em' }}>
+          {pairs.map((pair, i) => (
+            <Box key={i}>
+              <Pair
+                allPairs={pairs}
+                index={i}
+                onDelete={deletePair}
+                pair={pair}
+                readOnly={readOnly}
+                setPair={setPair}
+                setter={setter}
+              />
+            </Box>
+          ))}
+        </div>
+      ) : (
+        <Typography variant="body1" style={{ paddingBottom: '1em' }}>Add one below</Typography>
+      )
+      }
 
       { !readOnly && (
         <Box>
