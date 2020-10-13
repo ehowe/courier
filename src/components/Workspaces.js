@@ -178,7 +178,7 @@ function Workspaces(): Element<typeof Paper> {
             { requests.map((request, index) => (
               <ListItem button key={index} alignItems="flex-start" style={{ alignItems: 'center' }} selected={request.name === activeRequest.name}>
                 <RequestLabel request={request.method} onClick={() => handleRequestSelect(request.name)}/>
-                <ListItemText primary={request.name} onClick={() => handleRequestSelect(request.name)}/>
+                <ListItemText primary={request.name} onClick={() => handleRequestSelect(request.name)} style={{ marginRight: '1em' }}/>
                 <DeleteButton onDelete={deleteRequest} value={request.method + ' ' + request.name}/>
               </ListItem>
             ))}

@@ -71,13 +71,14 @@ function createWindow() {
   })
   expressApp.listen(2468)
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    height: 768,
     show: false,
+    width: 1024,
   })
   const startURL = isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`
 
   mainWindow.loadURL(startURL)
+  mainWindow.maximize()
 
   mainWindow.once('ready-to-show', () => mainWindow.show())
   mainWindow.on('closed', () => {

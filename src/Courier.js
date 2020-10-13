@@ -29,7 +29,7 @@ function Courier(): Element<typeof ConfigProvider> {
   return (
     <ConfigProvider>
       <Container className="Courier" disableGutters maxWidth={false} style={{ flex: '1 1 auto', height: '100%' }}>
-        <Grid container direction="row" spacing={2} style={{ height: '100%' }}>
+        <Grid container direction="row" spacing={2} wrap="nowrap" style={{ height: '100%' }}>
           <Grid item md={2} style={{ height: '100%' }}>
             <Workspaces />
           </Grid>
