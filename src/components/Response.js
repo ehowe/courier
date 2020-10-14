@@ -30,8 +30,6 @@ function Response(props: PropsT): Element<typeof Paper> {
     response: responseProp,
   } = props
 
-  console.log(responseTemplate)
-
   const [response, setResponse] = React.useState(responseTemplate)
   const config = React.useContext(ConfigContext)
 

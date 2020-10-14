@@ -1,39 +1,49 @@
 {
+  "author": {
+    "name": "Eugene Howe",
+    "email": "eugene@xtreme-computers.net",
+    "homepage": "https://github.com/ehowe/courier"
+  },
   "name": "courier",
   "private": true,
   "version": "0.1.0",
   "homepage": "./",
-  "main": "./electron/main.js",
+  "main": "./public/electron.js",
+  "description": "API client in the spirit of Postman/Paw/Insomnia",
+  "build": {
+    "extends": null,
+    "appId": "com.electron.courier",
+    "productName": "Courier",
+    "compression": "store",
+    "files": [
+      "build/**/*",
+      "public/**/*",
+      "src/configTemplate.js"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "icon": "public/icon.png"
+    },
+    "dmg": {
+      "background": "public/background.gif"
+    },
+    "win": {
+      "icon": "public/icon.png"
+    }
+  },
   "dependencies": {
-    "@babel/core": "^7.11.6",
-    "@babel/preset-flow": "^7.10.4",
-    "@babel/preset-react": "^7.10.4",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.3.2",
-    "@testing-library/user-event": "^7.1.2",
     "ace-builds": "^1.4.12",
     "axios": "^0.20.0",
     "babel-eslint": "^10.1.0",
     "classnames": "^2.2.6",
     "concurrently": "^5.3.0",
     "cors": "^2.8.5",
-    "electron": "^9.2.0",
-    "electron-builder": "^22.8.0",
     "electron-is-dev": "^1.2.0",
     "electron-json-config": "^1.5.3",
     "electron-reload": "^1.5.0",
-    "eslint-config-react-app": "^5.2.1",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-flowtype": "^5.2.0",
-    "eslint-plugin-import": "^2.22.0",
-    "eslint-plugin-jsx-a11y": "^6.3.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.20.6",
-    "eslint-plugin-react-hooks": "^4.1.2",
-    "eslint-plugin-standard": "^4.0.1",
+    "electron-squirrel-startup": "^1.0.0",
     "express": "^4.17.1",
     "flow-bin": "^0.134.0",
     "http-proxy-middleware": "^1.0.5",
@@ -53,7 +63,9 @@
     "flow": "flow",
     "lint": "$(npm bin)/eslint src/**",
     "start": "react-scripts start",
-    "test": "react-scripts test"
+    "test": "react-scripts test",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder build --x64 --macos --win --linux --c.extraMetadata.main=build/electron.js -p never"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -69,5 +81,25 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-flow": "^7.10.4",
+    "@babel/preset-react": "^7.10.4",
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "electron": "10.1.3",
+    "electron-builder": "^22.9.1",
+    "eslint-config-react-app": "^5.2.1",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-flowtype": "^5.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-react": "^7.20.6",
+    "eslint-plugin-react-hooks": "^4.1.2",
+    "eslint-plugin-standard": "^4.0.1"
   }
 }

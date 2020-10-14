@@ -2,7 +2,7 @@ const {
   configTemplate,
 } = require('../src/configTemplate')
 
-const { app, BrowserWindow } = require('electron')
+const { app, ipcMain, shell, BrowserWindow } = require('electron')
 const axios = require('axios')
 const config = require('electron-json-config')
 const cors = require('cors')
@@ -74,16 +74,36 @@ function createWindow() {
     height: 768,
     show: false,
     width: 1024,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    },
   })
-  const startURL = isDev ? 'http://localhost:3000' : `file://${path.join(__dirname, '../build/index.html')}`
+  const startURL = isDev ? 'http://localhost:3000' : `file://${__dirname}/../build/index.html`
 
   mainWindow.loadURL(startURL)
   mainWindow.maximize()
 
-  mainWindow.once('ready-to-show', () => mainWindow.show())
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show()
+
+    ipcMain.on('open-external-window', (event, arg) => {
+      shell.openExternal(arg)
+    })
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
 }
 
 app.on('ready', createWindow)
+
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
+
+app.on('window-all-closed', () => {
+  app.quit()
+})

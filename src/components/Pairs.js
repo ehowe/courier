@@ -1,6 +1,6 @@
 // @flow
 
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import type { Element } from 'react'
 import type {
