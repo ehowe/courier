@@ -1,23 +1,101 @@
 const {
+  appConfigTemplate,
   configTemplate,
 } = require('../src/configTemplate')
 
-const { app, ipcMain, shell, BrowserWindow } = require('electron')
+const { app, ipcMain, shell, BrowserWindow, Menu, MenuItem } = require('electron')
 const axios = require('axios')
-const config = require('electron-json-config')
+const appConfig = require('./includes/jsonConfig')({ fileName: '/appConfig.js' })
 const cors = require('cors')
 const express = require('express')
 const https = require('https')
 const isDev = require('electron-is-dev')
 const path = require('path')
+const { configProviders } = require('./includes/configProviders')
 
-require('electron-reload')(__dirname, {
-  electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
-})
+const isMac = process.platform === 'darwin'
+
+if (isDev) {
+  try {
+    require('electron-reloader')(module, {
+      watchRenderer: true,
+      ignore: ['dist/**/*', 'build/**/*'],
+    })
+  } catch (_) {
+    console.log('Error')
+  }
+}
 
 let mainWindow
+const menu = new Menu()
+
+function changeActiveMenuItem(newName) {
+  appConfig.setBulk({ defaultConfigProvider: newName })
+
+  app.relaunch()
+  app.exit()
+}
+
+function configureMenu() {
+  const fileMenu = new MenuItem({
+    label: 'File',
+    submenu: [
+      isMac ? { role: 'close' } : { role: 'quit' },
+    ],
+  })
+  const sourceMenu = new MenuItem({
+    id: 'source',
+    label: 'Source',
+    submenu: [
+      {
+        enabled: false,
+        id: 'active-provider',
+        label: `Active Config Provider: ${appConfig.all().defaultConfigProvider}`,
+      },
+      { type: 'separator' },
+      ...Object.values(configProviders).map(provider => {
+        const menu = provider.menu
+        const active = provider.name === appConfig.all().defaultConfigProvider
+
+        const activeMenuItem = {
+          enabled: false,
+          id: `active-${provider.name}`,
+          label: 'Active',
+          visible: active,
+        }
+
+        const setActiveMenuItem = {
+          click: () => changeActiveMenuItem(provider.name),
+          id: `set-active-${provider.name}`,
+          label: 'Set Active',
+          visible: !active,
+        }
+
+        menu.submenu.forEach(item => {
+          item.visible = active
+        })
+
+        menu.submenu.unshift(activeMenuItem, setActiveMenuItem)
+
+        return menu
+      }),
+    ],
+  })
+
+  menu.append(fileMenu)
+  menu.append(sourceMenu)
+
+  Menu.setApplicationMenu(menu)
+}
 
 function createWindow() {
+  if (Object.entries(appConfig.all()).length === 0) {
+    appConfig.setBulk({ ...appConfigTemplate })
+  }
+  const config = Object.values(configProviders).find(provider => provider.name === appConfig.all().defaultConfigProvider)
+
+  configureMenu()
+
   const expressApp = express()
   expressApp.use(express.json())
   expressApp.use(function(req, res, next) {
@@ -28,16 +106,16 @@ function createWindow() {
   })
 
   expressApp.get('/config', cors(), (req, res, next) => {
-    if (Object.entries(config.all()).length === 0) {
-      config.setBulk({ ...configTemplate })
+    if (Object.entries(config.get()).length === 0) {
+      config.write({ ...configTemplate })
     }
-    return res.status(200).send(config.all())
+    return res.status(200).send(config.get())
   })
 
   expressApp.put('/config', cors(), (req, res, next) => {
-    config.setBulk({ ...req.body })
+    config.write({ ...req.body })
 
-    return res.status(200).send(config.all())
+    return res.status(200).send(config.get())
   })
 
   expressApp.post('/api', cors(), (req, res, next) => {
@@ -75,7 +153,7 @@ function createWindow() {
     show: false,
     width: 1024,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'includes', 'preload.js'),
     },
   })
   const startURL = isDev ? 'http://localhost:3000' : `file://${__dirname}/../build/index.html`
@@ -105,5 +183,7 @@ app.on('activate', () => {
 })
 
 app.on('window-all-closed', () => {
-  app.quit()
+  if (!isMac) {
+    app.quit()
+  }
 })

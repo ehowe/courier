@@ -29,3 +29,12 @@ exports.configTemplate = {
     exports.workspaceTemplate,
   ],
 }
+
+exports.appConfigTemplate = {
+  defaultConfigProvider: 'Local',
+  gitConfig: {
+    repository: null,
+    ref: null,
+    path: null,
+  }
+}
