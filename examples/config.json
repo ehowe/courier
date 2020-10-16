@@ -1,0 +1,83 @@
+{
+  "defaultWorkspace": "default",
+  "workspaces": [
+    {
+      "defaultRequest": "postman",
+      "name": "default",
+      "requests": [
+        {
+          "body": {
+            "Ace": "{}",
+            "FormUrlEncoded": []
+          },
+          "bodyType": "json",
+          "headers": [],
+          "method": "get",
+          "name": "default",
+          "queries": [],
+          "url": "https://postman-echo.com/get",
+          "response": {
+            "body": {
+              "Response": "{\n  \"args\": {},\n  \"headers\": {\n    \"x-forwarded-proto\": \"https\",\n    \"x-forwarded-port\": \"443\",\n    \"host\": \"postman-echo.com\",\n    \"x-amzn-trace-id\": \"Root=1-5f85c484-3c85eca4690ab67c12ff8d0a\",\n    \"content-length\": \"2\",\n    \"accept\": \"application/json\",\n    \"content-type\": \"application/json\",\n    \"user-agent\": \"axios/0.20.0\"\n  },\n  \"url\": \"https://postman-echo.com/get\"\n}"
+            },
+            "code": 200,
+            "headers": [
+              {
+                "key": "content-length",
+                "value": "311",
+                "enabled": true
+              },
+              {
+                "key": "content-type",
+                "value": "application/json; charset=utf-8",
+                "enabled": true
+              }
+            ]
+          }
+        },
+        {
+          "body": {
+            "Ace": "{\"test\": \"test}\n\n",
+            "FormUrlEncoded": [
+              {
+                "key": "test",
+                "value": "test",
+                "enabled": true
+              }
+            ]
+          },
+          "bodyType": "x-www-form-urlencoded",
+          "headers": [],
+          "method": "post",
+          "name": "postman",
+          "queries": [
+            {
+              "key": "",
+              "value": "",
+              "enabled": false
+            }
+          ],
+          "url": "https://postman-echo.com/post",
+          "response": {
+            "body": {
+              "Response": "{\n  \"args\": {},\n  \"data\": \"\",\n  \"files\": {},\n  \"form\": {\n    \"test\": \"test\"\n  },\n  \"headers\": {\n    \"x-forwarded-proto\": \"https\",\n    \"x-forwarded-port\": \"443\",\n    \"host\": \"postman-echo.com\",\n    \"x-amzn-trace-id\": \"Root=1-5f85c76a-0d19b26044907b8159e01430\",\n    \"content-length\": \"9\",\n    \"accept\": \"application/x-www-form-urlencoded\",\n    \"content-type\": \"application/x-www-form-urlencoded\",\n    \"user-agent\": \"axios/0.20.0\"\n  },\n  \"json\": {\n    \"test\": \"test\"\n  },\n  \"url\": \"https://postman-echo.com/post\"\n}"
+            },
+            "code": 200,
+            "headers": [
+              {
+                "key": "content-length",
+                "value": "413",
+                "enabled": true
+              },
+              {
+                "key": "content-type",
+                "value": "application/json; charset=utf-8",
+                "enabled": true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
