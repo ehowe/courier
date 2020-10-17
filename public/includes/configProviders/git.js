@@ -5,8 +5,11 @@ const git = require('isomorphic-git')
 const http = require("isomorphic-git/http/node")
 const local = require('./local')
 const openEditor = require('open-editor')
+const pathLib = require('path')
 const tmp = require('tmp')
 const { app, dialog, Notification } = require('electron')
+
+// TODO: Memoize so that pull and push do not clone everytime
 
 function checkConfig() {
   if (Object.values(appConfig.all().gitConfig).some(prop => prop === undefined)) {
@@ -38,7 +41,7 @@ const notify = (body, show = () => {}) => {
 const pull = async () => {
   checkConfig()
   
-  const config = {
+  const {
     path,
     ref,
     repository,
@@ -54,7 +57,7 @@ const pull = async () => {
     dir: tempDir.name,
     url: repository,
     singleBranch: true,
-    depth: 1 
+    depth: 1,
   })
   
   let commitOid = await git.resolveRef({ fs, dir: tempDir.name, ref })
@@ -75,8 +78,58 @@ const pull = async () => {
   })
 }
 
-const push = () => {
-  console.log('not implemented')
+const push = async () => {
+  checkConfig()
+
+  const {
+    email,
+    name,
+    path,
+    ref,
+    repository,
+    token,
+  } = appConfig.all().gitConfig
+
+  const tempDir = tmp.dirSync()
+
+  notify(`Cloning ${repository}`)
+
+  await git.clone({
+    fs,
+    http,
+    dir: tempDir.name,
+    url: repository,
+    singleBranch: true,
+    depth: 1,
+  })
+
+  fs.writeFileSync(pathLib.join(tempDir.name, path), JSON.stringify(local.get(), null, 2))
+
+  notify(`Committing config to ${repository} as ${name}: ${email}`)
+
+  await git.add({
+    fs,
+    dir: tempDir.name,
+    filepath: path.replace(/^\//, ''),
+  })
+
+  await git.commit({
+    fs,
+    dir: tempDir.name,
+    author: {
+      name,
+      email,
+    },
+    message: `Updated config ${new Date(new Date().toUTCString())}`,
+  })
+
+  const pushResult = await git.push({
+    fs,
+    http,
+    dir: tempDir.name,
+    ref,
+    onAuth: () => ({ username: token }),
+  })
 }
 
 const configure = () => {

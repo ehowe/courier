@@ -36,5 +36,8 @@ exports.appConfigTemplate = {
     repository: null,
     ref: null,
     path: null,
+    name: null,
+    email: null,
+    token: null,
   }
 }
