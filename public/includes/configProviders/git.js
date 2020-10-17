@@ -2,20 +2,21 @@
 const appConfig = require('../jsonConfig')({ fileName: '/appConfig.js' })
 const fs = require('fs')
 const git = require('isomorphic-git')
-const http = require("isomorphic-git/http/node")
+const http = require('isomorphic-git/http/node')
 const local = require('./local')
 const openEditor = require('open-editor')
 const pathLib = require('path')
 const tmp = require('tmp')
 const { app, dialog, Notification } = require('electron')
+const headers = { 'User-Agent': 'git/Courier' }
 
 // TODO: Memoize so that pull and push do not clone everytime
 
 function checkConfig() {
   if (Object.values(appConfig.all().gitConfig).some(prop => prop === undefined)) {
-    dialog.showErrorBox("Configuration problem", "Git is not configured. Please configure all attributes, restart the app, and then try again")
+    dialog.showErrorBox('Configuration problem', 'Git is not configured. Please configure all attributes, restart the app, and then try again')
 
-    throw new Error("Unconfigured git")
+    throw new Error('Unconfigured git')
   }
 }
 
@@ -40,11 +41,12 @@ const notify = (body, show = () => {}) => {
 
 const pull = async () => {
   checkConfig()
-  
+
   const {
     path,
     ref,
     repository,
+    token,
   } = appConfig.all().gitConfig
 
   const tempDir = tmp.dirSync()
@@ -57,23 +59,25 @@ const pull = async () => {
     dir: tempDir.name,
     url: repository,
     singleBranch: true,
-    depth: 1,
+    ref,
+    headers,
+    onAuth: () => ({ username: token }),
   })
-  
-  let commitOid = await git.resolveRef({ fs, dir: tempDir.name, ref })
-  let { blob } = await git.readBlob({
+
+  const commitOid = await git.resolveRef({ fs, dir: tempDir.name, ref })
+  const { blob } = await git.readBlob({
     fs,
     dir: tempDir.name,
     oid: commitOid,
     filepath: path.replace(/^\//, ''),
   })
-  
+
   local.write(JSON.parse(Buffer.from(blob).toString('utf8')))
 
   notify(`Writing config from ${path} and reloading app`, () => {
     setTimeout(() => {
       app.relaunch()
-      app.exit()    
+      app.exit()
     }, 3000)
   })
 }
@@ -99,8 +103,9 @@ const push = async () => {
     http,
     dir: tempDir.name,
     url: repository,
-    singleBranch: true,
-    depth: 1,
+    headers,
+    ref,
+    onAuth: () => ({ username: token }),
   })
 
   fs.writeFileSync(pathLib.join(tempDir.name, path), JSON.stringify(local.get(), null, 2))
@@ -123,11 +128,12 @@ const push = async () => {
     message: `Updated config ${new Date(new Date().toUTCString())}`,
   })
 
-  const pushResult = await git.push({
+  await git.push({
     fs,
     http,
     dir: tempDir.name,
     ref,
+    headers,
     onAuth: () => ({ username: token }),
   })
 }
@@ -136,7 +142,7 @@ const configure = () => {
   openEditor([
     {
       file: appConfig.file(),
-    }
+    },
   ])
 }
 
@@ -146,7 +152,7 @@ const menu = {
   submenu: [
     {
       label: 'Configure',
-      click: () => { configure() }
+      click: () => { configure() },
     },
     {
       label: 'Pull',

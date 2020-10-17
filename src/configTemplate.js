@@ -39,5 +39,5 @@ exports.appConfigTemplate = {
     name: null,
     email: null,
     token: null,
-  }
+  },
 }
