@@ -15,17 +15,6 @@ const { configProviders } = require('./includes/configProviders')
 
 const isMac = process.platform === 'darwin'
 
-if (isDev) {
-  try {
-    require('electron-reloader')(module, {
-      watchRenderer: true,
-      ignore: ['dist/**/*', 'build/**/*'],
-    })
-  } catch (_) {
-    console.log('Error')
-  }
-}
-
 let mainWindow
 const menu = new Menu()
 
@@ -101,7 +90,8 @@ function createWindow() {
   expressApp.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Methods', '*')
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.header('Access-Control-Allow-Headers', '*')
+    res.header('Access-Control-Expose-Headers', '*')
     next()
   })
 
@@ -133,6 +123,24 @@ function createWindow() {
       }),
     })
 
+    client.interceptors.request.use((config) => {
+      config.metadata = { startTime: new Date() }
+      return config
+    }, function(error) {
+      return Promise.reject(error)
+    })
+
+    client.interceptors.response.use((response) => {
+      const endTime = new Date()
+      const duration = endTime - response.config.metadata.startTime
+      response.headers['response-time'] = duration
+      return response
+    }, function(error) {
+      const endTime = new Date()
+      error.response.headers['response-time'] = endTime - error.config.metadata.startTime
+      return Promise.reject(error)
+    })
+
     client.request({
       data,
       headers,
@@ -143,7 +151,8 @@ function createWindow() {
       res.set(response.headers)
       return res.status(response.status).send(response.data)
     }).catch((error) => {
-      res.set({ ...error.repsonse.headers })
+      console.log(error)
+      res.set({ ...error.response.headers })
       return res.status(error.response.status).send(error.response.data)
     })
   })

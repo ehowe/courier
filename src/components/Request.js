@@ -45,6 +45,12 @@ type PropsT = {
   dispatchResponse: Function,
 }
 
+const filteredHeaders = [
+  'access-control*',
+  'connection',
+  'x-powered-by',
+]
+
 function Request(props: PropsT): Element<typeof Paper> {
   const {
     dispatchResponse,
@@ -126,7 +132,8 @@ function Request(props: PropsT): Element<typeof Paper> {
       handleResponseChange(response)
     }).catch((err: any) => {
       if (err.response) {
-        console.log('got response')
+        const response: ResponseT = transformResponse(err.response)
+        handleResponseChange(response)
       } else if (err.request) {
         console.log('got request')
       } else {
@@ -138,7 +145,7 @@ function Request(props: PropsT): Element<typeof Paper> {
   function transformResponse(res: any): ResponseT {
     const headerReducer = (array: Array<PairT>, key: string): Array<PairT> => ([...array, { key: key, value: res.headers[key], enabled: true }])
     const body = JSON.stringify(res.data, null, 2)
-    const headers = Object.keys(res.headers).reduce(headerReducer, [])
+    const headers = Object.keys(res.headers).filter(header => !filteredHeaders.some(filter => header.match(filter))).reduce(headerReducer, [])
     return { body: { Response: body }, code: res.status, headers: headers }
   }
 
