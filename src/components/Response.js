@@ -157,7 +157,7 @@ function Response(props: PropsT): Element<typeof Paper> {
   return (
     <Paper className="Response" style={{ height: '100%' }}>
       <Box style={{ height: '112px', width: '100%' }}>
-        <Toolbar style={{ width: '100%', paddingLeft: 0 }}>
+        <Toolbar style={{ width: '100%', paddingLeft: 0, paddingRight: 0 }}>
           <Box component="span" style={{ height: '2rem', width: '100%', display: 'flex' }}>
             <Chip
               variant="outlined"
