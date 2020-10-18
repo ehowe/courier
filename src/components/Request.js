@@ -279,6 +279,13 @@ function Request(props: PropsT): Element<typeof Paper> {
             setPair={setPair}
           />
         )}
+        {
+          activeTab === 'auth' && (
+            <div>
+              Not Implemented
+            </div>
+          )
+        }
         { activeTab === 'query' && (
           <Pairs
             pairs={queries}
