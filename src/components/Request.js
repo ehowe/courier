@@ -259,11 +259,11 @@ function Request(props: PropsT): Element<typeof Paper> {
           </Box>
         </Toolbar>
         <AppBar position="static">
-          <Tabs value={activeTab}>
-            <Tab onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
-            <Tab onClick={(e) => setActiveTab('auth')} value="auth" label="Auth"></Tab>
-            <Tab onClick={(e) => setActiveTab('query')} value="query" label="Query"></Tab>
-            <Tab onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
+          <Tabs value={activeTab} variant="fullWidth">
+            <Tab style={{ minWidth: '25%' }} onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
+            <Tab style={{ minWidth: '25%' }} onClick={(e) => setActiveTab('auth')} value="auth" label="Auth"></Tab>
+            <Tab style={{ minWidth: '25%' }} onClick={(e) => setActiveTab('query')} value="query" label="Query"></Tab>
+            <Tab style={{ minWidth: '25%' }} onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
           </Tabs>
         </AppBar>
       </Box>

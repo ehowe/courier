@@ -182,8 +182,8 @@ function Response(props: PropsT): Element<typeof Paper> {
         </Toolbar>
         <AppBar position="static">
           <Tabs value={activeTab}>
-            <Tab onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
-            <Tab onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
+            <Tab style={{ minWidth: '50%' }} onClick={(e) => setActiveTab('body')} value="body" label="Body"></Tab>
+            <Tab style={{ minWidth: '50%' }} onClick={(e) => setActiveTab('headers')} value="headers" label="Headers"></Tab>
           </Tabs>
         </AppBar>
       </Box>
