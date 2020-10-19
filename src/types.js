@@ -27,8 +27,14 @@ export type BasicAuthT = {
   password: string,
 }
 
+export type BearerAuthT = {
+  token: string,
+  prefix: string,
+}
+
 export type AuthT = {
   basic: BasicAuthT,
+  bearer: BearerAuthT,
 }
 
 export type BodyTypeT = "json" | "xml" | "yaml" | "x-www-form-urlencoded"

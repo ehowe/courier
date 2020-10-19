@@ -110,7 +110,8 @@ function createWindow() {
 
   expressApp.post('/api', cors(), (req, res, next) => {
     const {
-      auth,
+      authentication,
+      authProvider,
       data,
       headers,
       method,
@@ -123,6 +124,14 @@ function createWindow() {
         rejectUnauthorized: false,
       }),
     })
+
+    let auth
+
+    if (authProvider === 'Bearer') {
+      headers.Authorization = `${authentication.prefix} ${authentication.token}`
+    } else if (authProvider === 'Basic') {
+      auth = authentication
+    }
 
     client.interceptors.request.use((config) => {
       config.metadata = { startTime: new Date() }

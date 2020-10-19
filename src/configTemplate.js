@@ -6,13 +6,12 @@ exports.responseTemplate = {
 
 exports.authTemplate = {
   Basic: { username: '', password: '' },
-  Bearer: {},
-  Digest: {},
+  Bearer: { token: '', prefix: 'Bearer' },
 }
 
 exports.requestTemplate = {
   activeAuthProvider: 'None',
-  auth: { Basic: {}, Digest: {}, Bearer: {} },
+  auth: exports.authTemplate,
   body: { Ace: '{}', FormUrlEncoded: [] },
   bodyType: 'json',
   headers: [],

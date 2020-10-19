@@ -117,13 +117,14 @@ function Request(props: PropsT): Element<typeof Paper> {
     }
 
     const authProvider = config.activeRequest.activeAuthProvider
-    const auth = config.activeRequest.auth[authProvider]
+    const authentication = config.activeRequest.auth[authProvider]
 
     axios.post('http://localhost:2468/api', {
       data: {
+        authentication,
+        authProvider,
         data,
         url,
-        auth,
         method: selectedRequest,
         params: activeQueries,
         headers: {

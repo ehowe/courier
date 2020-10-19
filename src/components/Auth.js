@@ -16,7 +16,6 @@ const authTypes: Array<string> = [
   'None',
   'Basic',
   'Bearer',
-  'Digest',
 ]
 
 function Auth(): Element<'div'> {
@@ -53,7 +52,6 @@ function Auth(): Element<'div'> {
       </NativeSelect>
       { activeProvider === 'Basic' && <AuthProviders.Basic onChange={handleAuthChange} auth={auth.Basic}/> }
       { activeProvider === 'Bearer' && <AuthProviders.Bearer onChange={handleAuthChange} auth={auth.Bearer} /> }
-      { activeProvider === 'Digest' && <AuthProviders.Digest onChange={handleAuthChange} auth={auth.Digest} /> }
     </div>
   )
 }

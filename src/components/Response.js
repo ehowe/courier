@@ -61,20 +61,21 @@ const prettySize = (size: number): string => {
   return `${humanReadableSize} ${sizeLabels[index]}`
 }
 
-const prettyTimeLabel = (timeInMs) => {
+const prettyTimeLabel = (timeInMs): string => {
   if (timeInMs < 1000) { return timeLabels[0] }
   if (timeInMs === 1000) { return timeLabels[1] }
   if (timeInMs < 60000) { return timeLabels[2] }
   if (timeInMs === 60000) { return timeLabels[3] }
   if (timeInMs < 3600000) { return timeLabels[4] }
   if (timeInMs === 3600000) { return timeLabels[5] }
+  return timeLabels[0]
 }
 
-const prettyTime = (timeInMs) => {
-  let humanReadableTime = timeInMs
+const prettyTime = (timeInMs): string => {
+  let humanReadableTime: number = parseFloat(parseFloat(timeInMs).toFixed(2))
 
   while (humanReadableTime / 1000 > 1) {
-    humanReadableTime = humanReadableTime / 1000
+    humanReadableTime = parseFloat(humanReadableTime / 1000)
   }
 
   return `${humanReadableTime} ${prettyTimeLabel(timeInMs)}`
