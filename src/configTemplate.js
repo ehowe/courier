@@ -4,15 +4,23 @@ exports.responseTemplate = {
   headers: [],
 }
 
+exports.authTemplate = {
+  Basic: { username: '', password: '' },
+  Bearer: {},
+  Digest: {},
+}
+
 exports.requestTemplate = {
+  activeAuthProvider: 'None',
+  auth: { Basic: {}, Digest: {}, Bearer: {} },
   body: { Ace: '{}', FormUrlEncoded: [] },
   bodyType: 'json',
   headers: [],
   method: 'get',
   name: 'default',
   queries: [],
-  url: '',
   response: exports.responseTemplate,
+  url: '',
 }
 
 exports.workspaceTemplate = {

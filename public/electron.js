@@ -110,6 +110,7 @@ function createWindow() {
 
   expressApp.post('/api', cors(), (req, res, next) => {
     const {
+      auth,
       data,
       headers,
       method,
@@ -142,6 +143,7 @@ function createWindow() {
     })
 
     client.request({
+      auth,
       data,
       headers,
       method,
@@ -151,7 +153,6 @@ function createWindow() {
       res.set(response.headers)
       return res.status(response.status).send(response.data)
     }).catch((error) => {
-      console.log(error)
       res.set({ ...error.response.headers })
       return res.status(error.response.status).send(error.response.data)
     })

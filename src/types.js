@@ -22,4 +22,13 @@ export type ResponseT = {
   headers: any,
 }
 
+export type BasicAuthT = {
+  username: string,
+  password: string,
+}
+
+export type AuthT = {
+  basic: BasicAuthT,
+}
+
 export type BodyTypeT = "json" | "xml" | "yaml" | "x-www-form-urlencoded"

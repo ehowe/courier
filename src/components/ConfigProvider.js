@@ -57,7 +57,6 @@ function addRequestToWorkspace(currentState: any, payload: { name: string, metho
 function removeRequestFromWorkspace(currentState: any, payload: { name: string, method: string }): any {
   const workspace = currentState.workspaces[getCurrentWorkspaceIndex(currentState)]
   const active = currentState.activeRequest.name === payload.name && currentState.activeRequest.method === payload.method
-  console.log(workspace.requests)
   const requests = workspace.requests.filter(request => !(request.name === payload.name && request.method === payload.method))
 
   let newState = updateWorkspace(currentState, 'requests', requests)
@@ -105,6 +104,12 @@ function configReducer(state: any, action: { type?: string, payload: any, update
       break
     case 'setDefaultWorkspace':
       newState = { ...newState, defaultWorkspace: action.payload }
+      break
+    case 'updateRequestAuth':
+      newState = updateRequest(newState, 'auth', action.payload)
+      break
+    case 'updateRequestAuthProvider':
+      newState = updateRequest(newState, 'activeAuthProvider', action.payload)
       break
     case 'updateRequestBody':
       newState = updateRequest(newState, 'body', action.payload)

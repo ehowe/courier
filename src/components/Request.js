@@ -20,6 +20,7 @@ import Tabs from '@material-ui/core/Tabs'
 import Toolbar from '@material-ui/core/Toolbar'
 import TextField from '@material-ui/core/TextField'
 
+import Auth from './Auth'
 import Body from './Body'
 import Pairs from './Pairs'
 
@@ -115,10 +116,14 @@ function Request(props: PropsT): Element<typeof Paper> {
       data = body.Ace
     }
 
+    const authProvider = config.activeRequest.activeAuthProvider
+    const auth = config.activeRequest.auth[authProvider]
+
     axios.post('http://localhost:2468/api', {
       data: {
         data,
         url,
+        auth,
         method: selectedRequest,
         params: activeQueries,
         headers: {
@@ -281,9 +286,7 @@ function Request(props: PropsT): Element<typeof Paper> {
         )}
         {
           activeTab === 'auth' && (
-            <div>
-              Not Implemented
-            </div>
+            <Auth />
           )
         }
         { activeTab === 'query' && (
