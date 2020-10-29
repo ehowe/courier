@@ -3,18 +3,30 @@ import React, { createContext, useEffect, useReducer } from 'react'
 import axios from 'axios'
 import omit from 'lodash/omit'
 
-import { configTemplate, workspaceTemplate, requestTemplate } from '../configTemplate'
+import { configTemplate, workspaceTemplate, requestTemplate, environmentTemplate } from '../configTemplate'
 
 export const ConfigContext = createContext({})
+export const PrivateConfigContext = createContext({})
 export const ConfigDispatchContext = createContext(undefined)
+export const PrivateConfigDispatchContext = createContext(undefined)
 
 async function getConfig() {
   const response = await axios.get('http://localhost:2468/config')
   return response.data
 }
 
+async function getPrivateConfig() {
+  const response = await axios.get('http://localhost:2468/privateConfig')
+  return response.data
+}
+
 async function putConfig(newConfig) {
   const response = await axios.put('http://localhost:2468/config', newConfig)
+  return response.data
+}
+
+async function putPrivateConfig(newConfig) {
+  const response = await axios.put('http://localhost:2468/privateConfig', newConfig)
   return response.data
 }
 
@@ -37,7 +49,33 @@ function updateWorkspace(currentState: any, attribute: string, payload: any): an
   return newState
 }
 
-function updateRequest(currentState: any, attribute: string, payload: string): any {
+function updatePrivateWorkspace(publicState: any, currentState: any, attribute: string, payload: any): any {
+  const newState = { ...currentState }
+  const workspaceName = publicState.activeWorkspace.name
+
+  if (!newState.workspaces) {
+    newState.workspaces = []
+  }
+
+  let workspaceIndex = newState.workspaces.findIndex(workspace => workspace.name === workspaceName)
+
+  if (workspaceIndex === -1) {
+    newState.workspaces.push({
+      name: workspaceName,
+      environments: [],
+    })
+
+    workspaceIndex = newState.workspaces.findIndex(workspace => workspace.name === workspaceName)
+  }
+
+  const workspace = { ...newState.workspaces[workspaceIndex], [attribute]: payload }
+
+  newState.workspaces[workspaceIndex] = workspace
+
+  return newState
+}
+
+function updateRequest(currentState: any, attribute: string, payload: any): any {
   const workspace = { ...currentState.workspaces[getCurrentWorkspaceIndex(currentState)] }
   const requests = [...workspace.requests]
   requests[getCurrentRequestIndex(currentState)] = { ...currentState.activeRequest, [attribute]: payload }
@@ -93,17 +131,27 @@ function configReducer(state: any, action: { type?: string, payload: any, update
     case 'deleteRequest':
       newState = removeRequestFromWorkspace(newState, action.payload)
       break
+    case 'setActiveEnvironment':
+      newState = { ...newState, activeEnvironment: action.payload }
+      break
     case 'setActiveRequest':
       newState = { ...newState, activeRequest: action.payload }
       break
     case 'setActiveWorkspace':
       newState = { ...newState, activeWorkspace: action.payload }
       break
+    case 'setDefaultEnvironment':
+      newState = updateWorkspace(newState, 'defaultEnvironment', action.payload)
+      break
     case 'setDefaultRequest':
       newState = setDefaultRequest(newState, action.payload)
       break
     case 'setDefaultWorkspace':
       newState = { ...newState, defaultWorkspace: action.payload }
+      break
+    case 'setEnvironments':
+      newState = updateWorkspace(newState, 'environments', action.payload)
+      console.log(newState)
       break
     case 'updateRequestAuth':
       newState = updateRequest(newState, 'auth', action.payload)
@@ -133,7 +181,7 @@ function configReducer(state: any, action: { type?: string, payload: any, update
       newState = updateRequest(newState, 'method', action.payload)
       break
     default:
-      newState = { ...newState, ...action.payload, activeWorkspace: workspaceTemplate, activeRequest: requestTemplate }
+      newState = { ...newState, ...action.payload, activeWorkspace: workspaceTemplate, activeRequest: requestTemplate, activeEnvironment: environmentTemplate }
   }
 
   if (action.updateConfig) {
@@ -143,11 +191,34 @@ function configReducer(state: any, action: { type?: string, payload: any, update
   return newState
 }
 
+function privateConfigReducer(state: any, action: { type?: string, payload: any, updateConfig?: boolean, publicState: any }): any {
+  let newState = { ...getPrivateConfig() }
+
+  switch (action.type) {
+    case 'setEnvironments':
+      newState = updatePrivateWorkspace(action.publicState, newState, 'environments', action.payload)
+      break
+    default:
+      newState = { ...newState, ...action.payload }
+  }
+
+  if (action.updateConfig) {
+    putPrivateConfig(newState)
+  }
+
+  return newState
+}
+
 const ConfigProvider = ({ children }) => {
   const [state: any, dispatch: Function] = useReducer(configReducer, { ...configTemplate, activeWorkspace: workspaceTemplate, activeRequest: requestTemplate })
+  const [privateState :any, dispatchPrivate: Function] = useReducer(privateConfigReducer, {})
 
   useEffect(() => {
     getConfig().then(payload => dispatch({ payload }))
+  }, [])
+
+  useEffect(() => {
+    getPrivateConfig().then(payload => dispatchPrivate({ payload }))
   }, [])
 
   useEffect(() => {
@@ -164,6 +235,18 @@ const ConfigProvider = ({ children }) => {
     state.activeWorkspace = workspace
     dispatch({ type: 'setActiveWorkspace', payload: workspace })
 
+    let environment
+
+    if (workspace.defaultEnvironment.length > 0) {
+      environment = workspace.environments.find(environment => environment.name === workspace.defaultEnvironment)
+    } else if (workspace.environments.length > 0) {
+      environment = environment.workspaces[0]
+    } else {
+      environment = environmentTemplate
+    }
+
+    dispatch({ type: 'setActiveEnvironment', payload: environment })
+
     let request
 
     if (workspace.defaultRequest.length > 0) {
@@ -177,13 +260,17 @@ const ConfigProvider = ({ children }) => {
     state.activeRequest = request
 
     dispatch({ type: 'setActiveRequest', payload: request })
-  }, [state.defaultWorkspace, state.workspaces, state.activeWorkspace, state.activeRequest])
+  }, [state.defaultWorkspace, state.workspaces, state.activeWorkspace, state.activeRequest, state.activeEnvironment])
 
   return (
     <ConfigDispatchContext.Provider value={dispatch}>
-      <ConfigContext.Provider value={state}>
-        {children}
-      </ConfigContext.Provider>
+      <PrivateConfigDispatchContext.Provider value={dispatchPrivate}>
+        <ConfigContext.Provider value={state}>
+          <PrivateConfigContext.Provider value={privateState}>
+            {children}
+          </PrivateConfigContext.Provider>
+        </ConfigContext.Provider>
+      </PrivateConfigDispatchContext.Provider>
     </ConfigDispatchContext.Provider>
   )
 }

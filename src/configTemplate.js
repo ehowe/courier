@@ -22,8 +22,16 @@ exports.requestTemplate = {
   url: '',
 }
 
+exports.environmentTemplate = {
+  configuration: [],
+  name: 'base',
+  private: false,
+}
+
 exports.workspaceTemplate = {
+  defaultEnvironment: 'base',
   defaultRequest: 'default',
+  environments: [exports.environmentTemplate],
   name: 'default',
   requests: [
     exports.requestTemplate,

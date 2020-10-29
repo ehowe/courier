@@ -105,7 +105,7 @@ function Body(props: PropsT): Element<typeof Box> {
 
       { bodyType === 'x-www-form-urlencoded' && (
         <Pairs
-          pairs={body.FormUrlEncoded}
+          pairs={body.FormUrlEncoded ? body.FormUrlEncoded : []}
           addPair={addPair}
           setPair={setPair}
           deletePair={deletePair}

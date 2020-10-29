@@ -7,6 +7,5 @@ module.exports = {
     require('@babel/plugin-proposal-class-properties'),
     require('@babel/plugin-transform-runtime'),
     require('@babel/plugin-transform-async-to-generator'),
-    [require('styled-jsx/babel'), { optimizeForSpeed: true }],
   ],
 }

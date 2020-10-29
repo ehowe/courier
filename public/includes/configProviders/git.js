@@ -3,12 +3,18 @@ const appConfig = require('../jsonConfig')({ fileName: '/appConfig.js' })
 const fs = require('fs')
 const git = require('isomorphic-git')
 const http = require('isomorphic-git/http/node')
-const local = require('./local')
 const openEditor = require('open-editor')
 const pathLib = require('path')
 const tmp = require('tmp')
 const { app, dialog, Notification } = require('electron')
 const headers = { 'User-Agent': 'git/Courier' }
+
+const {
+  getPublic,
+  getPrivate,
+  writePublic,
+  writePrivate,
+} = require('./local')
 
 // TODO: Memoize so that pull and push do not clone everytime
 
@@ -18,14 +24,6 @@ function checkConfig() {
 
     throw new Error('Unconfigured git')
   }
-}
-
-const get = () => {
-  return local.get()
-}
-
-const write = (config) => {
-  return local.write(config)
 }
 
 const notify = (body, show = () => {}) => {
@@ -72,7 +70,7 @@ const pull = async () => {
     filepath: path.replace(/^\//, ''),
   })
 
-  local.write(JSON.parse(Buffer.from(blob).toString('utf8')))
+  writePublic(JSON.parse(Buffer.from(blob).toString('utf8')))
 
   notify(`Writing config from ${path} and reloading app`, () => {
     setTimeout(() => {
@@ -108,7 +106,7 @@ const push = async () => {
     onAuth: () => ({ username: token }),
   })
 
-  fs.writeFileSync(pathLib.join(tempDir.name, path), JSON.stringify(local.get(), null, 2))
+  fs.writeFileSync(pathLib.join(tempDir.name, path), JSON.stringify(getPublic(), null, 2))
 
   notify(`Committing config to ${repository} as ${name}: ${email}`)
 
@@ -166,8 +164,10 @@ const menu = {
 }
 
 module.exports = {
-  get,
+  getPublic,
+  getPrivate,
   menu,
-  write,
+  writePublic,
+  writePrivate,
   name: 'Git',
 }

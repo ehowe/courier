@@ -1,7 +1,8 @@
 // @flow
 
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useCallback, useReducer, useState } from 'react'
 import classNames from 'classnames'
+import debounce from 'lodash/debounce'
 
 import type { Element } from 'react'
 import type {
@@ -34,22 +35,83 @@ function Pair(props: PropsT): Element<typeof Fragment> {
     setter,
   } = props
 
-  const [key, setKey] = useState(pair.key)
-  const [value, setValue] = useState(pair.value)
-  const [enabled, setEnabled] = useState(pair.enabled)
+  const debouncedSave = useCallback(debounce((key, value, enabled) => {
+    if (setPair) {
+      console.log('key, value, enabled', key, value, enabled)
+      setPair(pair, setter, allPairs, index, key, value, enabled)
+    }
+  }, 1000), [])
 
-  function updatePair() {
-    setPair(pair, setter, allPairs, index, key, value, enabled)
+  const reducer = (state: PairT, action: { type: string, payload: string | boolean }): PairT => {
+    switch (action.type) {
+      case 'setKey':
+        debouncedSave(action.payload, state.value, state.enabled)
+        // $FlowExpectedError
+        return { ...state, key: action.payload }
+      case 'setValue':
+        debouncedSave(state.key, action.payload, state.enabled)
+        // $FlowExpectedError
+        return { ...state, value: action.payload }
+      case 'setEnabled':
+        debouncedSave(state.key, state.value, action.payload)
+        // $FlowExpectedError
+        return { ...state, enabled: action.payload }
+      default:
+        throw new Error()
+    }
+  }
+
+  const { key, value, enabled } = pair
+
+  const [state, dispatch] = useReducer(reducer, { key, value, enabled })
+  const [valid, setValid] = useState(true)
+
+  const updatePair = ({ type, payload }: { type: string, payload: string | boolean }) => {
+    let pairValid = true
+
+    if (type === 'setKey') {
+      pairValid = !allPairs.some(pair => pair.key !== state.key && pair.key === payload)
+
+      setValid(pairValid)
+    }
+
+    if (pairValid) {
+      dispatch({ type, payload })
+    }
   }
 
   return (
     <Fragment>
-      <TextField className={classNames('pairText', { disabled: readOnly })} disabled={readOnly} placeholder="Key" label="Key" defaultValue={key} onChange={(e) => setKey(e.target.value)} onBlur={updatePair}/>
-      <TextField className={classNames('pairText', { disabled: readOnly })}disabled={readOnly} placeholder="Value" label="Value" defaultValue={value} onChange={(e) => setValue(e.target.value) } onBlur={updatePair}/>
+      <TextField
+        className={classNames('pairText', { disabled: readOnly })}
+        defaultValue={state.key}
+        disabled={readOnly}
+        error={!valid}
+        label="Key"
+        onChange={(e) => updatePair({ type: 'setKey', payload: e.currentTarget.value })}
+        placeholder="Key"
+      />
+      <TextField
+        className={classNames('pairText', { disabled: readOnly })}
+        defaultValue={state.value}
+        disabled={readOnly}
+        label="Value"
+        onChange={(e) => updatePair({ type: 'setValue', payload: e.currentTarget.value })}
+        placeholder="Value"
+      />
       { !readOnly && (
         <Fragment>
-          <Checkbox className={classNames('pairAction')} checked={enabled} onChange={(e) => setEnabled(!enabled)} onBlur={updatePair}/>
-          <DeleteButton className={classNames('pairAction')} onDelete={() => onDelete(allPairs, setter, index)} value={key + '/' + value} Element="span"/>
+          <Checkbox
+            checked={state.enabled}
+            className={classNames('pairAction')}
+            onChange={(e) => updatePair({ type: 'setEnabled', payload: !state.enabled })}
+          />
+          <DeleteButton
+            Element="span"
+            className={classNames('pairAction')}
+            onDelete={() => onDelete && onDelete(allPairs, setter, index)}
+            value={state.key + '/' + state.value}
+          />
         </Fragment>
       )}
     </Fragment>

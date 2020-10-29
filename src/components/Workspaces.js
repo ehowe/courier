@@ -12,6 +12,7 @@ import RequestLabel from './RequestLabel'
 
 import { workspaceTemplate, requestTemplate } from '../configTemplate'
 import DeleteButton from './DeleteButton'
+import Environments from './Environments'
 
 import Box from '@material-ui/core/Box'
 import Button from '@material-ui/core/Button'
@@ -92,7 +93,7 @@ function Workspaces(): Element<typeof Paper> {
     dispatchConfig({ type: 'deleteRequest', payload: { name, method }, updateConfig: true })
   }
 
-  function handleRequestSelect(name: string) {
+  function handleRequestSelect(name: string): void {
     dispatchConfig({ type: 'setDefaultRequest', payload: name, updateConfig: true })
   }
 
@@ -141,7 +142,7 @@ function Workspaces(): Element<typeof Paper> {
           <Select
             style={{ width: '100px' }}
             value={newRequestMethod}
-            onChange={(e: SyntheticEvent<HTMLInputElement>): void => setNewRequestMethod(e.target.value)}
+            onChange={(e: SyntheticEvent<HTMLInputElement>): void => setNewRequestMethod(e.currentTarget.value)}
           >
             {REQUESTS.map((request: string): React.Element<'option'> => (
               <MenuItem key={request} value={request}>{upperCase(request)}</MenuItem>
@@ -173,7 +174,10 @@ function Workspaces(): Element<typeof Paper> {
             </Select>
           </FormControl>
         </Box>
-        <Box style={{ height: 'calc(100% - 112px)' }}>
+        <Box style={{ height: '112px' }}>
+          <Environments />
+        </Box>
+        <Box style={{ height: 'calc(100% - 224px)' }}>
           <List>
             { requests.map((request, index) => (
               <ListItem button key={index} alignItems="flex-start" style={{ alignItems: 'center' }} selected={request.name === activeRequest.name}>

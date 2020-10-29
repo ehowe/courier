@@ -96,16 +96,28 @@ function createWindow() {
   })
 
   expressApp.get('/config', cors(), (req, res, next) => {
-    if (Object.entries(config.get()).length === 0) {
-      config.write({ ...configTemplate })
+    if (Object.entries(config.getPublic()).length === 0) {
+      config.writePublic({ ...configTemplate })
     }
-    return res.status(200).send(config.get())
+    return res.status(200).send(config.getPublic())
+  })
+
+  expressApp.get('/privateConfig', cors(), (req, res, next) => {
+    if (Object.entries(config.getPrivate()).length === 0) {
+      config.writePrivate({})
+    }
+    return res.status(200).send(config.getPrivate())
   })
 
   expressApp.put('/config', cors(), (req, res, next) => {
-    config.write({ ...req.body })
+    config.writePublic({ ...req.body })
 
-    return res.status(200).send(config.get())
+    return res.status(200).send(config.getPublic())
+  })
+
+  expressApp.put('/privateConfig', cors(), (req, res, next) => {
+    console.log('putting private config', req.body)
+    config.writePrivate({ ...req.body })
   })
 
   expressApp.post('/api', cors(), (req, res, next) => {

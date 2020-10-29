@@ -26,7 +26,7 @@ function Bearer(props: PropsT): Element<'div'> {
   }
 
   function handlePrefixChange(e: SyntheticEvent<HTMLInputElement>): void {
-    setPrefix(e.currentTarger.value)
+    setPrefix(e.currentTarget.value)
     onChange({ type: 'Bearer', value: { token, prefix: e.currentTarget.value } })
   }
 
