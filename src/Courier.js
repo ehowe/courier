@@ -14,8 +14,10 @@ import Request from './components/Request'
 import Response from './components/Response'
 import Workspaces from './components/Workspaces'
 
+import { responseTemplate } from './configTemplate'
+
 function Courier(): Element<typeof ConfigProvider> {
-  const [response: ResponseT, dispatchResponse: Function] = useReducer(responseReducer, { body: { Response: '' }, headers: [] })
+  const [response: ResponseT, dispatchResponse: Function] = useReducer(responseReducer, responseTemplate)
 
   function responseReducer(state: ResponseT, action: { type: string, payload: any }): ResponseT {
     switch (action.type) {

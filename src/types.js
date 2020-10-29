@@ -37,4 +37,11 @@ export type AuthT = {
   bearer: BearerAuthT,
 }
 
+export type EnvironmentT = {
+  configuration: Array<PairT>,
+  name: string,
+  private: boolean,
+  missing?: boolean,
+}
+
 export type BodyTypeT = "json" | "xml" | "yaml" | "x-www-form-urlencoded"

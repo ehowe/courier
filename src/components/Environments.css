@@ -1,0 +1,30 @@
+.environmentModal > .MuiTab-wrapper {
+  align-items: flex-end;
+}
+
+.environmentModal.tabMissing {
+  color: red;
+}
+
+.environmentModal.tabMissing::before {
+  content: "\26A0";
+  padding-right: 1em;
+}
+
+.EnvironmentDropdown.missing {
+  color: red;
+}
+
+.EnvironmentDropdown.missing::before {
+  content: "\26A0";
+  padding-right: 1em;
+}
+
+.EnvironmentDropdown.defaultOptionMissing > .MuiSelect-root {
+  color: red;
+}
+
+.EnvironmentDropdown.defaultOptionMissing > .MuiSelect-root::before {
+  content: "\26A0";
+  padding-right: 1em;
+}

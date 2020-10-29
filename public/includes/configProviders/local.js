@@ -1,13 +1,22 @@
+const privateConfig = require('../jsonConfig')({ fileName: '/privateConfig.js' })
 const config = require('../jsonConfig')()
 
-const get = () => {
+const getPublic = () => {
   return config.all()
 }
 
-const write = (newConfig) => {
+const getPrivate = () => {
+  return privateConfig.all()
+}
+
+const writePublic = (newConfig) => {
   config.setBulk({ ...newConfig })
 
   return config.all()
+}
+
+const writePrivate = (newConfig) => {
+  privateConfig.setBulk({ ...newConfig })
 }
 
 const menu = {
@@ -17,8 +26,10 @@ const menu = {
 }
 
 module.exports = {
-  get,
-  write,
+  getPublic,
+  getPrivate,
+  writePublic,
+  writePrivate,
   menu,
   name: 'Local',
 }

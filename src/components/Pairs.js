@@ -17,9 +17,11 @@ type PropsT = {
   addPair?: Function,
   deletePair?: Function,
   pairs: Array<PairT>,
+  placeholder?: string,
   readOnly?: boolean,
   setPair?: Function,
   setter?: Function,
+  styles?: any,
 }
 
 function Pairs(props: PropsT): Element<'div'> {
@@ -27,9 +29,11 @@ function Pairs(props: PropsT): Element<'div'> {
     addPair,
     deletePair,
     pairs: pairsParam,
+    placeholder = 'Add one below',
     readOnly = false,
     setPair,
     setter,
+    styles = {},
   } = props
 
   useEffect(() => {
@@ -39,7 +43,7 @@ function Pairs(props: PropsT): Element<'div'> {
   const [pairs, setAllPairs] = useState(pairsParam)
 
   return (
-    <div className="tabPanel" style={{ maxWidth: '100%', paddingTop: '1em' }}>
+    <div className="tabPanel" style={{ ...styles, maxWidth: '100%', paddingTop: '1em' }}>
       { pairs.length > 0 ? (
         <div style={{ paddingBottom: '1em' }}>
           {pairs.map((pair, i) => (
@@ -57,7 +61,7 @@ function Pairs(props: PropsT): Element<'div'> {
           ))}
         </div>
       ) : (
-        <Typography variant="body1" style={{ paddingBottom: '1em' }}>Add one below</Typography>
+        <Typography variant="body1" style={{ paddingBottom: '1em' }}>{placeholder}</Typography>
       )
       }
 
